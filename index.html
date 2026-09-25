@@ -1,1 +1,129 @@
-...
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
+    <title>Yuvex Tech | Premium App Development & AI Solutions</title>
+    <meta name="title" content="Yuvex Tech | Premium App Development & AI Solutions">
+    <meta name="description" content="Yuvex Tech specializes in high-end mobile app development, custom web platforms, and strategic AI integration. We transform bold ideas into scalable digital products with world-class UI/UX design.">
+    <meta name="keywords" content="application development, AI solutions, UI/UX design, custom software development, mobile apps, web platforms, fintech development, Yuvex Tech, scalable architecture, React development, Gemini AI integration, software engineering, digital transformation">
+    <meta name="author" content="Yuvex Tech">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://yuvex.tech/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yuvex.tech/">
+    <meta property="og:title" content="Yuvex Tech | Premium App Development & AI Solutions">
+    <meta property="og:description" content="Transforming bold ideas into high-performance applications. Expert engineering meets world-class design.">
+    <meta property="og:image" content="https://picsum.photos/seed/yuvex-og/1200/630">
+    <meta property="og:site_name" content="Yuvex Tech">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://yuvex.tech/">
+    <meta property="twitter:title" content="Yuvex Tech | Premium App Development & AI Solutions">
+    <meta property="twitter:description" content="Transforming bold ideas into high-performance applications. Expert engineering meets world-class design.">
+    <meta property="twitter:image" content="https://picsum.photos/seed/yuvex-og/1200/630">
+    <meta property="twitter:site" content="@yuvextech">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://picsum.photos/seed/yuvex-fav/32/32">
+    <link rel="apple-touch-icon" href="https://picsum.photos/seed/yuvex-fav/180/180">
+
+    <!-- Fonts & Scripts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Genos:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gray: {
+                            950: '#030712',
+                        }
+                    },
+                    fontFamily: {
+                        'genos': ['Genos', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-delayed': 'float 6s ease-in-out infinite 3s',
+                        'pulse-subtle': 'pulse-subtle 4s ease-in-out infinite',
+                        'spin-slow': 'spin 12s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        'pulse-subtle': {
+                            '0%, 100%': { transform: 'scale(1)', opacity: '0.3' },
+                            '50%': { transform: 'scale(1.05)', opacity: '0.6' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer base {
+            html {
+                scroll-behavior: smooth;
+            }
+            body {
+                @apply font-['Inter'] bg-white text-gray-900 dark:bg-gray-950 dark:text-[#f9fafb] antialiased transition-colors duration-500;
+            }
+            section {
+                scroll-margin-top: 100px;
+            }
+        }
+        @layer components {
+            .glass {
+                @apply bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl border border-gray-200 dark:border-white/[0.08] shadow-sm dark:shadow-none;
+            }
+            .text-gradient {
+                @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400;
+            }
+            .mask-fade {
+                mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+                -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-marquee { animation: marquee 30s linear infinite; }
+        .pause-on-hover:hover .animate-marquee { animation-play-state: paused; }
+    </style>
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/client": "https://esm.sh/react-dom@^19.2.4/client",
+    "@google/genai": "https://esm.sh/@google/genai@^1.39.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>

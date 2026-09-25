@@ -1,4 +1,5 @@
 #v2
-0
-/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/index.html	2455	52	text
-/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/README.md	154	0	text
+1
+/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/index.html	3	0	text
+/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/README.md	3	0	text
+/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/.gitignore	0	0	text
