@@ -148,7 +148,7 @@ const AdminCMS: React.FC<AdminCMSProps> = ({
             </p>
             <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-300 font-mono">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>yuvextech@gmail.com</span>
+              <span>yovses@gmail.com</span>
             </div>
           </div>
 
@@ -198,21 +198,7 @@ const AdminCMS: React.FC<AdminCMSProps> = ({
               Authenticate & Open CMS
             </button>
 
-            <div className="p-3 rounded-xl bg-blue-950/30 border border-blue-900/40 flex items-center justify-between text-xs">
-              <span className="text-[11px] text-gray-400">
-                Key: <code className="text-blue-300 font-mono">u(Lj(!R2L,?2!wa</code>
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setPasscode('u(Lj(!R2L,?2!wa');
-                  loginAdmin('u(Lj(!R2L,?2!wa');
-                }}
-                className="px-2.5 py-1 bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/30 rounded-lg text-[11px] font-bold transition-all"
-              >
-                ⚡ 1-Click Unlock
-              </button>
-            </div>
+            
 
             <div className="flex items-center justify-between pt-4 border-t border-gray-800 text-xs">
               <button
