@@ -1,11 +1,86 @@
-<div align="center">
+# Yuvex Tech Portfolio & CMS
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Official web platform for **Yuvex Tech** (https://yuvextech.github.io/).
 
-  <h1>Built with AI Studio</h2>
+---
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## 🚀 Deploying to GitHub Pages (`https://yuvextech.github.io/`)
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+Everything is pre-configured for automated deployment to GitHub Pages.
 
-</div>
+### Method 1: Automated Deployment via GitHub Actions (Recommended)
+
+1. **Create Repository on GitHub**:
+   - Go to [GitHub New Repository](https://github.com/new).
+   - Name the repository **`yuvextech.github.io`** (exact name for your root user page).
+   - Set it to **Public**.
+
+2. **Push your code to GitHub**:
+   ```bash
+   git init
+   git add .
+   git commit -m "Deploy Yuvex Tech to GitHub Pages"
+   git branch -M main
+   git remote add origin https://github.com/yuvextech/yuvextech.github.io.git
+   git push -u origin main
+   ```
+
+3. **Enable GitHub Actions Deployment**:
+   - In your GitHub repository, navigate to **Settings** > **Pages**.
+   - Under **Build and deployment** > **Source**, select **`GitHub Actions`**.
+   - The workflow in `.github/workflows/deploy.yml` will automatically build and publish your site to `https://yuvextech.github.io/`.
+
+4. **(Optional) Add Gemini API Key for AI Features**:
+   - Go to **Settings** > **Secrets and variables** > **Actions**.
+   - Click **New repository secret**.
+   - Name: `GEMINI_API_KEY`
+   - Value: *Your Gemini API Key*
+   - Whenever you push, the build will bundle the key securely for AI brainstorming and AI content generation.
+
+---
+
+### Method 2: Manual 1-Command Deploy via `gh-pages`
+
+If you prefer building and deploying directly from your local terminal:
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Build and publish directly to the gh-pages branch
+npm run deploy
+```
+
+Then in GitHub **Settings** > **Pages**, ensure the source is set to deploy from the `gh-pages` branch.
+
+---
+
+## 🛠 Features Configured for GitHub Pages
+
+- **Base URL**: Set to `./` in `vite.config.ts` so all assets and routes resolve properly.
+- **Hash-Based Client Routing**: Preserves state across refreshes on static hosts.
+- **`.nojekyll`**: Included in `public/.nojekyll` to disable Jekyll processing of static assets.
+- **`404.html` SPA Fallback**: Included in `public/404.html` to automatically redirect any deep links back to the app without 404 errors.
+- **GitHub Actions Workflow**: Included in `.github/workflows/deploy.yml` with automated testing, building, and deployment.
+
+---
+
+## ✈️ Telegram Channel & Group Auto-Poster
+
+The CMS features built-in automated broadcasting to Telegram Channels and Groups:
+
+1. **Setup Your Bot**:
+   - Message `@BotFather` on Telegram and send `/newbot`.
+   - Copy your HTTP API Bot Token.
+2. **Add Bot as Administrator**:
+   - Add your bot to your target Telegram Channel or Group as an **Administrator** with **"Post Messages"** permissions.
+3. **Configure in Admin CMS**:
+   - Open **Admin CMS** > **Telegram Auto-Post** tab.
+   - Enter your Bot Token and click **Verify & Save Bot**.
+   - Add your target channels (`@yourchannel` or `-100...` Chat ID) or groups.
+   - Click **Send Test** to verify instant delivery.
+4. **Auto-Post Rules**:
+   - **New Blog Posts & AI Articles**: When published, automatically formatted and sent to your active channels/groups with cover photo, markdown summary, tags, and read link.
+   - **Announcement Banner Updates**: When saved or clicked **Broadcast to Telegram Now**, pushes the top announcement banner to all active targets.
+   - **Live Quick Composer**: Send instant announcements with photo attachments directly from the CMS.
+

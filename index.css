@@ -1,0 +1,6 @@
+/* Yuvex Tech Styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+}
