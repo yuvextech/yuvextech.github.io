@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "projects": [
+    {
+      "id": "yuvextech.github.io",
+      "name": "yuvextech.github.io",
+      "root": "",
+      "buildSystem": "native",
+      "settings": {},
+      "modules": [],
+      "libraries": []
+    }
+  ]
+}
