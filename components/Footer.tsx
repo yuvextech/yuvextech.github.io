@@ -67,7 +67,6 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <li><button onClick={() => onNavigate('services')} className="hover:text-blue-600 dark:hover:text-white transition-colors text-left">Services</button></li>
               <li><button onClick={() => onNavigate('about')} className="hover:text-blue-600 dark:hover:text-white transition-colors text-left">About Us</button></li>
               <li><button onClick={() => onNavigate('portfolio')} className="hover:text-blue-600 dark:hover:text-white transition-colors text-left">Portfolio</button></li>
-              <li><button onClick={() => onNavigate('explore-details')} className="hover:text-blue-600 dark:hover:text-white transition-colors text-left font-bold text-blue-600 dark:text-blue-400">Explore Details ✨</button></li>
               <li><button onClick={() => onNavigate('contact')} className="hover:text-blue-600 dark:hover:text-white transition-colors text-left">Contact Us</button></li>
             </ul>
           </div>
@@ -80,15 +79,6 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <li><button onClick={() => onNavigate('testimonials')} className="hover:text-blue-600 dark:hover:text-white transition-colors text-left">Testimonials</button></li>
               <li><button onClick={() => onNavigate('privacy')} className="hover:text-blue-600 dark:hover:text-white transition-colors text-left">Privacy Policy</button></li>
               <li className="pt-2 border-t border-gray-200 dark:border-white/10">
-                <button 
-                  onClick={() => onNavigate('admin')} 
-                  className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold transition-colors text-left group"
-                >
-                  <span>Admin CMS Studio</span>
-                  <span className="px-1.5 py-0.5 rounded text-[10px] bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-mono">
-                    {isAuthenticated ? 'Active' : 'Login'}
-                  </span>
-                </button>
               </li>
             </ul>
           </div>

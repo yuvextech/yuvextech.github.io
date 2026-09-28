@@ -96,14 +96,6 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
           <div className="flex items-center gap-2.5 sm:gap-3">
             <GlobalSearch onNavigate={onNavigate} />
             <button 
-              onClick={() => onNavigate('admin')}
-              className="px-3 py-1.5 rounded-full text-xs font-bold border border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-500/10 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all flex items-center gap-1.5"
-              title="Admin CMS Dashboard"
-            >
-              <span>⚙️</span>
-              <span className="hidden xl:inline">CMS</span>
-            </button>
-            <button 
               onClick={onToggleTheme}
               className="p-2.5 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white transition-all active:scale-95"
             >
@@ -167,18 +159,6 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
                 <span>💬</span>
                 <span>Start a Discussion</span>
                 <span className="transition-transform group-hover:translate-x-1">→</span>
-              </button>
-              <button 
-                type="button"
-                aria-label="Open Admin CMS"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  onNavigate('admin');
-                }}
-                className="cursor-pointer px-6 py-5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-800 dark:text-gray-200 font-bold rounded-2xl hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 transition-all text-center flex items-center justify-center gap-2 active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-500/30 text-base"
-              >
-                <span>⚙️</span>
-                <span>Admin CMS</span>
               </button>
             </div>
           </div>
