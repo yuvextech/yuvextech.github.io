@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>Yuvex Tech</ShortName>
+  <Description>Search Yuvex Tech — App Development & AI Solutions</Description>
+  <Url type="text/html" template="https://yuvextech.github.io/?q={searchTerms}"/>
+  <Image width="16" height="16" type="image/png">https://picsum.photos/seed/yuvex-fav/16/16</Image>
+  <InputEncoding>UTF-8</InputEncoding>
+  <Language>en-US</Language>
+  <Tags>app development, AI, software engineering, UI/UX, mobile apps</Tags>
+</OpenSearchDescription>

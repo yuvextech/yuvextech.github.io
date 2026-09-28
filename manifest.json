@@ -1,0 +1,27 @@
+{
+  "name": "Yuvex Tech — App Development & AI Solutions",
+  "short_name": "Yuvex Tech",
+  "description": "Premium app development, custom web platforms, and strategic AI integration.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#030712",
+  "orientation": "any",
+  "categories": ["technology", "developer tools", "business"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "https://picsum.photos/seed/yuvex-fav/192/192",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://picsum.photos/seed/yuvex-fav/512/512",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
