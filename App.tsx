@@ -53,43 +53,27 @@ const AppContent: React.FC = () => {
   // SEO & Meta Tag Management
   useEffect(() => {
     const brandName = settings.siteName || 'Yuvex Tech';
-    const baseUrl = 'https://yuvextech.github.io';
     let title = `${brandName} | Premium App Development & AI Solutions`;
     let description = 'Yuvex Tech specializes in high-end mobile app development, custom web platforms, and strategic AI integration.';
-    let keywords = 'application development, AI solutions, UI/UX design, custom software development, mobile apps, web platforms, fintech development, Yuvex Tech, scalable architecture, React development, Gemini AI integration, software engineering, digital transformation';
-    let canonicalUrl = baseUrl;
-    let ogImage = 'https://picsum.photos/seed/yuvex-og/1200/630';
-    let pageType = 'WebSite';
-    let breadcrumbList = null;
 
     switch (view) {
       case 'admin':
         title = `Admin Content Studio | ${brandName}`;
         description = 'Manage projects, tech news, services, testimonials, and site-wide settings.';
-        keywords = 'admin, content management, CMS, projects, settings';
-        canonicalUrl = `${baseUrl}/admin`;
         break;
       case 'portfolio':
         title = `Our Portfolio | ${brandName}`;
         description = 'Explore our latest work in mobile apps, web platforms, and AI integrations.';
-        keywords = 'portfolio, case studies, mobile apps, web platforms, AI integrations, app development projects';
-        canonicalUrl = `${baseUrl}/portfolio`;
         break;
       case 'blog':
         title = `The Knowledge Base & Tech News | ${brandName}`;
         description = 'Insights on engineering, design, and artificial intelligence from our team.';
-        keywords = 'blog, tech news, engineering, design, AI insights, software development';
-        canonicalUrl = `${baseUrl}/blog`;
         break;
       case 'blog-detail':
         const post = blogPosts.find(p => p.id === selectedBlogId);
         if (post) {
           title = `${post.title} | ${brandName} Blog`;
           description = post.excerpt;
-          keywords = `${post.category}, ${post.tags?.join(', ') || 'tech blog'}, ${brandName}`;
-          canonicalUrl = `${baseUrl}/blog/${post.id}`;
-          ogImage = post.image || ogImage;
-          pageType = 'Article';
         }
         break;
       case 'explore-details':
@@ -98,47 +82,27 @@ const AppContent: React.FC = () => {
         if (project) {
           title = `${project.title} | Explore Details & Architecture | ${brandName}`;
           description = project.heroSubtitle || project.overview || project.description;
-          keywords = `${project.category}, ${project.tags?.join(', ') || 'software project'}, app development, architecture`;
-          canonicalUrl = `${baseUrl}/explore-details/${project.id}`;
-          ogImage = project.image || ogImage;
-          pageType = 'Article';
-          // Build breadcrumb
-          breadcrumbList = [
-            { name: 'Home', url: baseUrl },
-            { name: 'Portfolio', url: `${baseUrl}/portfolio` },
-            { name: project.title, url: canonicalUrl }
-          ];
         }
         break;
       case 'services':
         title = `Our Services | ${brandName}`;
         description = 'High-end mobile app development, custom web platforms, and AI strategy.';
-        keywords = 'mobile app development, web platforms, AI strategy, software development, UI/UX design, fintech development';
-        canonicalUrl = `${baseUrl}/services`;
         break;
       case 'about':
         title = `About ${brandName} | Engineering Excellence`;
         description = 'Learn about our mission to transform bold ideas into high-performance digital products.';
-        keywords = 'about us, engineering excellence, software company, app development team, AI experts';
-        canonicalUrl = `${baseUrl}/about`;
         break;
       case 'contact':
         title = `Contact Us | Start Your Project | ${brandName}`;
         description = 'Ready to build something amazing? Get in touch with our expert engineering team.';
-        keywords = 'contact us, get a quote, project inquiry, consultation, app development';
-        canonicalUrl = `${baseUrl}/contact`;
         break;
       case 'brainstorm':
         title = `AI Brainstorming | ${brandName}`;
         description = 'Use our AI-powered tool to brainstorm your next big digital product.';
-        keywords = 'AI brainstorming, tech ideas, digital product ideas, AI tool, innovation';
-        canonicalUrl = `${baseUrl}/brainstorm`;
         break;
       case 'privacy':
         title = `Privacy Policy | ${brandName}`;
         description = `How we handle and protect your data at ${brandName}.`;
-        keywords = 'privacy policy, data protection, GDPR, cookies, terms';
-        canonicalUrl = `${baseUrl}/privacy`;
         break;
     }
 
@@ -150,21 +114,6 @@ const AppContent: React.FC = () => {
       metaDescription.setAttribute('content', description);
     }
 
-    // Update meta keywords
-    const metaKeywords = document.querySelector('meta[name="keywords"]');
-    if (metaKeywords) {
-      metaKeywords.setAttribute('content', keywords);
-    }
-
-    // Update canonical URL
-    let canonicalLink = document.querySelector('link[rel="canonical"]');
-    if (!canonicalLink) {
-      canonicalLink = document.createElement('link');
-      canonicalLink.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonicalLink);
-    }
-    canonicalLink.setAttribute('href', canonicalUrl);
-
     // Update OG tags
     const ogTitle = document.querySelector('meta[property="og:title"]');
     if (ogTitle) ogTitle.setAttribute('content', title);
@@ -172,95 +121,13 @@ const AppContent: React.FC = () => {
     const ogDescription = document.querySelector('meta[property="og:description"]');
     if (ogDescription) ogDescription.setAttribute('content', description);
 
-    const ogUrl = document.querySelector('meta[property="og:url"]');
-    if (ogUrl) ogUrl.setAttribute('content', canonicalUrl);
-
-    const ogImageEl = document.querySelector('meta[property="og:image"]');
-    if (ogImageEl) ogImageEl.setAttribute('content', ogImage);
-
-    const ogType = document.querySelector('meta[property="og:type"]');
-    if (ogType) ogType.setAttribute('content', pageType === 'Article' ? 'article' : 'website');
-
-    // Update Twitter tags
     const twitterTitle = document.querySelector('meta[name="twitter:title"]');
     if (twitterTitle) twitterTitle.setAttribute('content', title);
 
     const twitterDescription = document.querySelector('meta[name="twitter:description"]');
     if (twitterDescription) twitterDescription.setAttribute('content', description);
 
-    const twitterImage = document.querySelector('meta[name="twitter:image"]');
-    if (twitterImage) twitterImage.setAttribute('content', ogImage);
-
-    // Inject JSON-LD structured data
-    const existingJsonLd = document.getElementById('yuvex-json-ld');
-    if (existingJsonLd) existingJsonLd.remove();
-
-    const jsonLd = document.createElement('script');
-    jsonLd.id = 'yuvex-json-ld';
-    jsonLd.type = 'application/ld+json';
-
-    const structuredData: any = {
-      '@context': 'https://schema.org',
-      '@type': pageType === 'Article' ? 'Article' : 'Organization',
-      'name': brandName,
-      'url': baseUrl,
-      'logo': `${baseUrl}/logo.png`,
-      'description': description,
-      'sameAs': [
-        settings.socialLinks?.twitter || 'https://twitter.com/yuvextech',
-        settings.socialLinks?.linkedin || 'https://linkedin.com/company/yuvextech',
-        settings.socialLinks?.github || 'https://github.com/yuvextech'
-      ]
-    };
-
-    if (pageType === 'Article' && view === 'blog-detail') {
-      const post = blogPosts.find(p => p.id === selectedBlogId);
-      if (post) {
-        structuredData['@type'] = 'BlogPosting';
-        structuredData.headline = post.title;
-        structuredData.description = post.excerpt;
-        structuredData.image = post.image;
-        structuredData.author = { '@type': 'Person', name: post.author || brandName };
-        structuredData.publisher = {
-          '@type': 'Organization',
-          name: brandName,
-          logo: { '@type': 'ImageObject', url: `${baseUrl}/logo.png` }
-        };
-        structuredData.datePublished = post.date;
-      }
-    } else if (pageType === 'Article' && (view === 'explore-details' || view === 'project-detail')) {
-      const project = projects.find(p => p.id === selectedProjectId) || projects[0];
-      if (project) {
-        structuredData['@type'] = 'CreativeWork';
-        structuredData.name = project.title;
-        structuredData.description = project.description;
-        structuredData.image = project.image;
-        structuredData.author = { '@type': 'Organization', name: brandName };
-      }
-    }
-
-    // Add breadcrumbList if applicable
-    if (breadcrumbList) {
-      const breadcrumbData = {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        'itemListElement': breadcrumbList.map((item, idx) => ({
-          '@type': 'ListItem',
-          'position': idx + 1,
-          'name': item.name,
-          'item': item.url
-        }))
-      };
-      const breadcrumbScript = document.createElement('script');
-      breadcrumbScript.type = 'application/ld+json';
-      breadcrumbScript.textContent = JSON.stringify(breadcrumbData);
-      document.head.appendChild(breadcrumbScript);
-    }
-
-    jsonLd.textContent = JSON.stringify(structuredData);
-    document.head.appendChild(jsonLd);
-
-  }, [view, selectedProjectId, selectedBlogId, projects, blogPosts, settings.siteName, settings.socialLinks]);
+  }, [view, selectedProjectId, selectedBlogId, projects, blogPosts, settings.siteName]);
 
   useEffect(() => {
     const handleHash = () => {

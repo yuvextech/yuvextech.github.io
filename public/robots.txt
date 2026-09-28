@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://yuvextech.github.io/sitemap.xml
-
-# Disallow admin/cms paths
-Disallow: /admin/
-Disallow: /cms/
