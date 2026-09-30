@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GoogleGenAI } from '@google/genai';
+import { generateText } from '../services/ai';
 import { BlogPost } from '../types';
 import { useCMS } from '../context/CMSContext';
 
@@ -65,8 +65,6 @@ export const AIPostGeneratorModal: React.FC<AIPostGeneratorModalProps> = ({
     setGenerationStep('🔍 Connecting to Google Search Grounding to find top trending results...');
 
     try {
-      const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY || '';
-      const ai = new GoogleGenAI({ apiKey });
 
       setGenerationStep('🌐 Querying Google Search and analyzing top ranking articles...');
 
@@ -100,20 +98,14 @@ Format your entire output strictly as valid JSON with NO markdown wrappers or co
   ]
 }`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: promptText,
-        config: {
-          tools: [{ googleSearch: {} }]
-        }
-      });
+      const response = await generateText(promptText, { googleSearch: true });
 
       setGenerationStep('✍️ Structuring article and extracting Google search grounding references...');
 
       const text = response.text || '';
       
       // Extract Google Search grounding metadata if available
-      const searchMetadata = response.candidates?.[0]?.groundingMetadata;
+      const searchMetadata = response.groundingMetadata;
       const webQueries = searchMetadata?.webSearchQueries || [query];
       setSearchQueriesUsed(webQueries);
 

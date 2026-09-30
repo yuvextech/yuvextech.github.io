@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useCMS } from '../context/CMSContext';
 
 interface AnnouncementBarProps {
@@ -8,8 +8,28 @@ interface AnnouncementBarProps {
 const AnnouncementBar: React.FC<AnnouncementBarProps> = ({ onNavigate }) => {
   const { settings, isAdmin } = useCMS();
   const [dismissed, setDismissed] = useState(false);
+  const barRef = useRef<HTMLDivElement>(null);
+  const visible = !!settings.announcement?.enabled && !dismissed;
 
-  if (!settings.announcement?.enabled || dismissed) {
+  // Publish the bar height as a CSS variable so the fixed navbar sits right below it
+  useEffect(() => {
+    const root = document.documentElement;
+    const el = barRef.current;
+    if (!visible || !el) {
+      root.style.setProperty('--announce-h', '0px');
+      return;
+    }
+    const update = () => root.style.setProperty('--announce-h', `${el.offsetHeight}px`);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      root.style.setProperty('--announce-h', '0px');
+    };
+  }, [visible]);
+
+  if (!visible) {
     return null;
   }
 
@@ -26,7 +46,7 @@ const AnnouncementBar: React.FC<AnnouncementBarProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="relative z-50 bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-white text-xs py-2.5 px-4 shadow-md transition-all">
+    <div ref={barRef} className="fixed top-0 left-0 w-full z-[105] bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-white text-xs py-2.5 px-4 shadow-md transition-all">
       <div className="container mx-auto flex items-center justify-between gap-4 max-w-7xl">
         <div className="flex-1 flex items-center justify-center sm:justify-start gap-3 flex-wrap">
           {badge && (

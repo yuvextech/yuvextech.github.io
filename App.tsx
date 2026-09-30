@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Services from './components/Services';
@@ -10,22 +10,29 @@ import AIPrompt from './components/AIPrompt';
 import ClientLogos from './components/ClientLogos';
 import Testimonials from './components/Testimonials';
 import Contact from './components/Contact';
-import PrivacyPolicy from './components/PrivacyPolicy';
-import PortfolioPage from './components/PortfolioPage';
-import ContactPage from './components/ContactPage';
-import AboutPage from './components/AboutPage';
-import BlogPage from './components/BlogPage';
-import ServicesPage from './components/ServicesPage';
-import TestimonialsPage from './components/TestimonialsPage';
-import BrainstormPage from './components/BrainstormPage';
-import ProjectDetailPage from './components/ProjectDetailPage';
-import ExploreDetailsPage from './components/ExploreDetailsPage';
-import AdminCMS from './components/AdminCMS';
+const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
+const PortfolioPage = lazy(() => import('./components/PortfolioPage'));
+const ContactPage = lazy(() => import('./components/ContactPage'));
+const AboutPage = lazy(() => import('./components/AboutPage'));
+const BlogPage = lazy(() => import('./components/BlogPage'));
+const ServicesPage = lazy(() => import('./components/ServicesPage'));
+const TestimonialsPage = lazy(() => import('./components/TestimonialsPage'));
+const BrainstormPage = lazy(() => import('./components/BrainstormPage'));
+const ProjectDetailPage = lazy(() => import('./components/ProjectDetailPage'));
+const ExploreDetailsPage = lazy(() => import('./components/ExploreDetailsPage'));
+const AdminCMS = lazy(() => import('./components/AdminCMS'));
 import AnnouncementBar from './components/AnnouncementBar';
-import SEOToolsPage from './components/SEOToolsPage';
+const SEOToolsPage = lazy(() => import('./components/SEOToolsPage'));
 import QuickActionDock from './components/QuickActionDock';
 import { updatePageSEO, buildDynamicUrl, getBaseUrl, generateArticleSchema, generateProjectSchema, generateDefaultSchema } from './utils/seo';
 import { CMSProvider, useCMS } from './context/CMSContext';
+
+const PageLoader: React.FC = () => (
+  <div className="min-h-[60vh] flex items-center justify-center" role="status" aria-live="polite">
+    <div className="w-10 h-10 rounded-full border-4 border-blue-600/20 border-t-blue-600 animate-spin" />
+    <span className="sr-only">Loading…</span>
+  </div>
+);
 
 type ViewState = 'home' | 'privacy' | 'portfolio' | 'contact' | 'about' | 'blog' | 'blog-detail' | 'services' | 'testimonials' | 'brainstorm' | 'project-detail' | 'explore-details' | 'admin' | 'seo-tools';
 
@@ -246,6 +253,7 @@ const AppContent: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
         <AnnouncementBar onNavigate={(target) => navigateTo(target as ViewState)} />
+        <Suspense fallback={<PageLoader />}>
         <AdminCMS 
           onBackToSite={() => navigateTo('home')}
           onBack={() => navigateTo('home')} 
@@ -253,6 +261,7 @@ const AppContent: React.FC = () => {
           onNavigateToProject={(id) => navigateTo('explore-details', id)}
           onNavigateToBlog={(id) => navigateTo('blog-detail', id)}
         />
+        </Suspense>
       </div>
     );
   }
@@ -268,6 +277,7 @@ const AppContent: React.FC = () => {
       />
       
       <main className="animate-in fade-in duration-700">
+        <Suspense fallback={<PageLoader />}>
         {view === 'home' ? (
           <>
             <Hero />
@@ -320,6 +330,7 @@ const AppContent: React.FC = () => {
         ) : (
           <PrivacyPolicy onBack={() => navigateTo('home')} />
         )}
+        </Suspense>
       </main>
 
       <QuickActionDock 

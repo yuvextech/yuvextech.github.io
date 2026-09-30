@@ -79,16 +79,16 @@ const AdminCMS: React.FC<AdminCMSProps> = ({
     updateSettings,
     loginAdmin,
     logoutAdmin,
-    changePassword,
+    adminEmail,
+    authReady,
     exportAllData,
     importAllData,
     resetToDefaults
   } = useCMS();
 
   // Authentication form state
-  const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   
   // Navigation tabs
   const [activeTab, setActiveTab] = useState<CMSTab>('overview');
@@ -178,9 +178,6 @@ const AdminCMS: React.FC<AdminCMSProps> = ({
   const [settingsSavedMessage, setSettingsSavedMessage] = useState(false);
 
   // Password Change State
-  const [newPassInput, setNewPassInput] = useState('');
-  const [passChangeSuccess, setPassChangeSuccess] = useState(false);
-  const [passChangeError, setPassChangeError] = useState<string | null>(null);
   const [emailSaveFeedback, setEmailSaveFeedback] = useState<string | null>(null);
   const [factoryResetSuccess, setFactoryResetSuccess] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -190,13 +187,13 @@ const AdminCMS: React.FC<AdminCMSProps> = ({
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   // Handle Login
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (loginAdmin(passcode.trim())) {
-      setAuthError('');
-      setPasscode('');
-    } else {
-      setAuthError('Invalid administrator passcode. Please verify your credentials and try again.');
+  const handleLogin = async () => {
+    setIsSigningIn(true);
+    setAuthError('');
+    const result = await loginAdmin();
+    setIsSigningIn(false);
+    if (!result.ok) {
+      setAuthError(result.error || 'Sign-in failed. Please try again.');
     }
   };
 
@@ -222,57 +219,36 @@ const AdminCMS: React.FC<AdminCMSProps> = ({
             </p>
             <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-300 font-mono">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>yovses@gmail.com</span>
+              <span>Firebase Authentication</span>
             </div>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4 relative z-10">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
-                Administrator Passcode
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={passcode}
-                  onChange={(e) => {
-                    setPasscode(e.target.value);
-                    setAuthError('');
-                  }}
-                  placeholder="Enter administrator passcode"
-                  className="w-full pl-4 pr-11 py-3 bg-gray-950 border border-gray-800 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors text-sm font-mono"
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 text-sm px-1.5 py-1 rounded transition-colors"
-                  title={showPassword ? 'Hide passcode' : 'Show passcode'}
-                  aria-label={showPassword ? 'Hide passcode' : 'Show passcode'}
-                >
-                  {showPassword ? '🙈' : '👁️'}
-                </button>
-              </div>
-              <p className="text-[11px] text-gray-500 mt-2 flex items-center gap-1.5">
-                <span>🔒</span>
-                <span>Protected area. Authenticate with your administrator password.</span>
-              </p>
-            </div>
-
+          <div className="space-y-4 relative z-10">
             {authError && (
-              <div className="p-3 rounded-xl bg-red-950/50 border border-red-800/50 text-red-300 text-xs">
+              <div role="alert" className="p-3 rounded-xl bg-red-950/50 border border-red-800/50 text-red-300 text-xs">
                 {authError}
               </div>
             )}
 
             <button
-              type="submit"
-              className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 active:scale-[0.98] transition-all rounded-xl font-bold text-sm text-white shadow-lg shadow-blue-600/20"
+              type="button"
+              onClick={handleLogin}
+              disabled={!authReady || isSigningIn}
+              className="w-full py-3.5 bg-white hover:bg-gray-100 disabled:opacity-60 disabled:cursor-wait active:scale-[0.98] transition-all rounded-xl font-bold text-sm text-gray-900 shadow-lg flex items-center justify-center gap-3"
             >
-              Authenticate & Open CMS
+              <svg className="w-5 h-5" viewBox="0 0 48 48" aria-hidden="true">
+                <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/>
+                <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+                <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
+                <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 38.2 44 33 44 24c0-1.3-.1-2.4-.4-3.5z"/>
+              </svg>
+              {isSigningIn ? 'Signing in…' : 'Sign in with Google'}
             </button>
 
-            
+            <p className="text-[11px] text-gray-500 flex items-center gap-1.5">
+              <span>🔒</span>
+              <span>Protected area. Only authorized Yuvex Tech Google accounts can open the CMS.</span>
+            </p>
 
             <div className="flex items-center justify-between pt-4 border-t border-gray-800 text-xs">
               <button
@@ -283,10 +259,10 @@ const AdminCMS: React.FC<AdminCMSProps> = ({
                 ← Return to Live Website
               </button>
               <span className="text-[11px] text-gray-600 font-mono">
-                Admin Security v1.2
+                Admin Security v2.0
               </span>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     );
@@ -3486,6 +3462,30 @@ Engineering Team | Yuvex Tech
                             )}
                           </div>
 
+                          {/* Moderation */}
+                          {item.status && item.status !== 'approved' && (
+                            <div className="flex items-center justify-between gap-2 mb-3 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                              <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
+                                {item.status === 'pending' ? '⏳ Awaiting approval' : '✕ Rejected'}
+                              </span>
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  onClick={() => updateTestimonial(item.id, { status: 'approved', verified: true })}
+                                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold"
+                                >
+                                  Approve
+                                </button>
+                                {item.status === 'pending' && (
+                                  <button
+                                    onClick={() => updateTestimonial(item.id, { status: 'rejected' })}
+                                    className="px-2.5 py-1 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 text-[11px] font-bold"
+                                  >
+                                    Reject
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
                           {/* Action Buttons */}
                           <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-800">
                             <button
@@ -3581,47 +3581,21 @@ Engineering Team | Yuvex Tech
               </div>
             </div>
 
-            {/* Change Passcode */}
+            {/* Admin Account */}
             <div className="p-8 rounded-3xl bg-gray-900 border border-gray-800">
-              <h3 className="text-lg font-bold text-white mb-1">Admin Security Passcode</h3>
-              <p className="text-xs text-gray-400 mb-4">
-                Update the passcode required to unlock the Yuvex CMS Studio.
+              <h3 className="text-lg font-bold text-white mb-1">Admin Account</h3>
+              <p className="text-xs text-gray-400 mb-4 leading-relaxed">
+                The CMS is protected by Firebase Authentication. Only Google accounts listed in <code className="font-mono text-blue-300">ADMIN_EMAILS</code> (services/firebase.ts) and in <code className="font-mono text-blue-300">firestore.rules</code> can sign in and change site data.
               </p>
-              <div className="flex items-center gap-3 max-w-md">
-                <input
-                  type="password"
-                  value={newPassInput}
-                  onChange={(e) => {
-                    setNewPassInput(e.target.value);
-                    if (passChangeError) setPassChangeError(null);
-                  }}
-                  placeholder="Enter new passcode"
-                  className="px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white text-xs flex-1 focus:outline-none focus:border-blue-500 font-mono"
-                />
+              <div className="flex items-center justify-between gap-3 max-w-md p-3 rounded-xl bg-gray-950 border border-gray-800">
+                <span className="text-xs font-mono text-emerald-300 truncate">{adminEmail || 'Signed in'}</span>
                 <button
-                  onClick={() => {
-                    if (newPassInput.trim().length >= 4) {
-                      changePassword(newPassInput.trim());
-                      setPassChangeSuccess(true);
-                      setPassChangeError(null);
-                      setNewPassInput('');
-                      setTimeout(() => setPassChangeSuccess(false), 3000);
-                    } else {
-                      setPassChangeError('Passcode must be at least 4 characters long.');
-                      setTimeout(() => setPassChangeError(null), 4000);
-                    }
-                  }}
-                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold active:scale-95"
+                  onClick={() => { logoutAdmin(); }}
+                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-xs font-bold active:scale-95"
                 >
-                  Save Passcode
+                  Sign out
                 </button>
               </div>
-              {passChangeSuccess && (
-                <p className="text-xs text-emerald-400 font-bold mt-2">✓ Admin passcode updated successfully!</p>
-              )}
-              {passChangeError && (
-                <p className="text-xs text-red-400 font-bold mt-2">{passChangeError}</p>
-              )}
             </div>
 
             {/* Backup & JSON Exporter */}

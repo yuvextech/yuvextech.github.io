@@ -64,27 +64,27 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 w-full z-[100] transition-all duration-300 ${scrolled || isMenuOpen ? 'py-4 bg-white/90 dark:bg-gray-950/80 backdrop-blur-lg border-b border-gray-200 dark:border-white/5' : 'py-6 bg-transparent'}`}>
+      <nav style={{ top: 'var(--announce-h, 0px)' }} className={`fixed left-0 w-full z-[100] transition-all duration-300 ${scrolled || isMenuOpen ? 'py-4 bg-white/90 dark:bg-gray-950/80 backdrop-blur-lg border-b border-gray-200 dark:border-white/5' : 'py-6 bg-transparent'}`}>
         <div className="container mx-auto px-6 flex justify-between items-center">
           <button 
             onClick={() => { onNavigate('home'); setIsMenuOpen(false); window.scrollTo({top: 0, behavior: 'smooth'}); }}
-            className="flex items-center gap-2 group relative z-[110]"
+            className="flex items-center gap-2 group relative z-[110] shrink-0"
           >
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-bold text-xl text-white transition-transform group-hover:scale-110 shadow-lg shadow-blue-600/20 font-genos">
               {(settings.siteName || 'Yuvex Tech').charAt(0)}
             </div>
-            <span className="text-2xl font-bold tracking-tight dark:text-white font-genos">
+            <span className="text-2xl font-bold tracking-tight dark:text-white font-genos whitespace-nowrap">
               {settings.siteName || 'Yuvex Tech'}
             </span>
           </button>
           
-          <div className="hidden lg:flex items-center gap-6 text-[13px] font-semibold text-gray-500 dark:text-gray-400">
+          <div className="hidden xl:flex items-center gap-5 2xl:gap-6 text-[13px] font-semibold text-gray-500 dark:text-gray-400">
             {navLinks.map((link) => (
               <a 
                 key={link.name} 
                 href={link.href} 
                 onClick={(e) => handleLinkClick(e, link)}
-                className={`transition-colors relative group uppercase tracking-wider ${currentView === link.target ? 'text-blue-600 dark:text-blue-400' : 'hover:text-blue-600 dark:hover:text-white'}`}
+                className={`transition-colors relative group uppercase tracking-wider whitespace-nowrap ${currentView === link.target ? 'text-blue-600 dark:text-blue-400' : 'hover:text-blue-600 dark:hover:text-white'}`}
               >
                 {link.name}
                 <span className={`absolute -bottom-1 left-0 h-0.5 bg-blue-500 transition-all ${currentView === link.target ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
@@ -92,11 +92,11 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
             ))}
           </div>
 
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
             <GlobalSearch onNavigate={onNavigate} />
             <button 
               onClick={() => onNavigate('seo-tools')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-1.5 ${
+              className={`hidden sm:flex px-3 py-1.5 rounded-full text-xs font-bold border transition-all items-center gap-1.5 whitespace-nowrap ${
                 currentView === 'seo-tools'
                   ? 'bg-blue-600 text-white border-blue-600 shadow-md'
                   : 'border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-500/10 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white'
@@ -104,7 +104,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
               title="SEO Tools & SERP Previewer"
             >
               <span>⚡</span>
-              <span className="hidden xl:inline">SEO Tools</span>
+              <span className="hidden 2xl:inline">SEO Tools</span>
             </button>
             <button 
               onClick={onToggleTheme}
@@ -118,11 +118,11 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
             </button>
             <button 
               onClick={() => onNavigate('contact')}
-              className="hidden sm:block px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-full transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-600/20"
+              className="hidden sm:block whitespace-nowrap px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-full transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-600/20"
             >
               Start Project
             </button>
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 relative z-[110]">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="xl:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 relative z-[110]">
               <span className={`w-6 h-0.5 bg-gray-900 dark:bg-white transition-all ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
               <span className={`w-6 h-0.5 bg-gray-900 dark:bg-white transition-all ${isMenuOpen ? 'opacity-0' : ''}`}></span>
               <span className={`w-6 h-0.5 bg-gray-900 dark:bg-white transition-all ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
@@ -132,7 +132,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
       </nav>
 
       {/* Mobile Menu Overlay */}
-      <div className={`fixed inset-0 z-[90] lg:hidden transition-all duration-500 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`fixed inset-0 z-[90] xl:hidden transition-all duration-500 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <div className="absolute inset-0 bg-white dark:bg-gray-950/98 backdrop-blur-2xl" onClick={() => setIsMenuOpen(false)}></div>
         
         <div className={`relative h-full flex flex-col justify-center items-start px-10 md:px-20 transition-transform duration-500 ease-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-10'}`}>

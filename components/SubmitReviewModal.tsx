@@ -157,7 +157,7 @@ const SubmitReviewModal: React.FC<SubmitReviewModalProps> = ({ isOpen, onClose, 
               </h2>
               <p className="text-xs text-gray-400">
                 {submittedReview 
-                  ? 'Your testimonial is stored into the Yuvex Tech System CMS and published.'
+                  ? 'Your testimonial has been received and will appear once our team approves it.'
                   : 'Your experience inspires future partners and guides engineering excellence.'}
               </p>
             </div>
@@ -185,11 +185,11 @@ const SubmitReviewModal: React.FC<SubmitReviewModalProps> = ({ isOpen, onClose, 
               <div className="max-w-md mx-auto">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold font-mono uppercase tracking-wider mb-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                  Stored in System CMS
+                  Pending Approval
                 </span>
                 <h3 className="text-2xl font-black text-white mb-2">Thank you, {submittedReview.author}!</h3>
                 <p className="text-sm text-gray-300 leading-relaxed">
-                  Your review has been successfully stored to the Yuvex Tech CMS and added to our client success portfolio.
+                  Your review has been received. It will be published on our client success page as soon as our team approves it.
                 </p>
               </div>
 

@@ -26,8 +26,26 @@ import {
   subscribeDbComments,
   saveDbInquiry,
   subscribeDbInquiries,
+  updateDbInquiry,
+  deleteDbInquiry,
+  saveDbService,
+  deleteDbService,
+  subscribeDbServices,
+  saveDbTestimonial,
+  createDbTestimonialSubmission,
+  deleteDbTestimonial,
+  subscribeDbTestimonials,
+  createDbSubscriber,
+  saveDbSubscriber,
+  deleteDbSubscriber,
+  subscribeDbSubscribers,
+  subscriberDocId,
   seedDatabaseIfEmpty,
   testConnection,
+  subscribeAuth,
+  isAdminUser,
+  signInAdminWithGoogle,
+  signOutAdmin,
   INITIAL_TEAM_MEMBERS
 } from '../services/firebase';
 
@@ -236,12 +254,11 @@ const STORAGE_KEYS = {
   TELEGRAM_CONFIG: 'yuvex_cms_telegram_config_v1',
   TELEGRAM_LOGS: 'yuvex_cms_telegram_logs_v1',
   TEAM_MEMBERS: 'yuvex_cms_team_members_v1',
-  COMMENTS: 'yuvex_cms_comments_v1',
-  AUTH: 'yuvex_cms_admin_auth',
-  PASS: 'yuvex_cms_admin_pass'
+  COMMENTS: 'yuvex_cms_comments_v1'
 };
 
-export const DEFAULT_ADMIN_PASS = 'u(Lj(!R2L,?2!wa';
+// Legacy keys from the old passcode system; cleared on load.
+const LEGACY_AUTH_KEYS = ['yuvex_cms_admin_auth', 'yuvex_cms_admin_pass'];
 
 interface CMSContextType {
   projects: Project[];
@@ -259,6 +276,8 @@ interface CMSContextType {
   dbConnected: boolean;
   isAdmin: boolean;
   isAuthenticated: boolean;
+  adminEmail: string | null;
+  authReady: boolean;
 
   // Database actions
   syncWithDatabase: () => Promise<void>;
@@ -330,9 +349,8 @@ interface CMSContextType {
   updateSettings: (newSettings: Partial<SiteSettings>) => void;
   
   // Auth
-  loginAdmin: (password: string) => boolean;
-  logoutAdmin: () => void;
-  changePassword: (newPass: string) => void;
+  loginAdmin: () => Promise<{ ok: boolean; error?: string }>;
+  logoutAdmin: () => Promise<void>;
   
   // Backup / Restore
   exportAllData: () => string;
@@ -418,7 +436,7 @@ export const CMSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch (e) {
       console.error('Failed to load user requests:', e);
     }
-    return INITIAL_USER_REQUESTS;
+    return [];
   });
 
   // Newsletter Subscribers State
@@ -432,7 +450,7 @@ export const CMSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch (e) {
       console.error('Failed to load subscribers:', e);
     }
-    return INITIAL_SUBSCRIBERS;
+    return [];
   });
 
   // Post Notification Broadcast Logs
@@ -535,6 +553,26 @@ export const CMSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return [];
   });
 
+  // Admin Auth State (Firebase Auth — Google accounts on the ADMIN_EMAILS allowlist)
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [adminEmail, setAdminEmail] = useState<string | null>(null);
+  const [authReady, setAuthReady] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      LEGACY_AUTH_KEYS.forEach(k => localStorage.removeItem(k));
+    } catch {
+      /* ignore */
+    }
+    const unsub = subscribeAuth(user => {
+      const admin = isAdminUser(user);
+      setIsAdmin(admin);
+      setAdminEmail(admin ? user?.email ?? null : null);
+      setAuthReady(true);
+    });
+    return () => unsub();
+  }, []);
+
   // Cloud Database Connectivity State
   const [dbConnected, setDbConnected] = useState<boolean>(true);
 
@@ -545,15 +583,10 @@ export const CMSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     let unsubSettings: (() => void) | undefined;
     let unsubTeam: (() => void) | undefined;
     let unsubComments: (() => void) | undefined;
-    let unsubInquiries: (() => void) | undefined;
+    let unsubServices: (() => void) | undefined;
 
     testConnection().then(connected => {
       setDbConnected(connected);
-      if (connected) {
-        seedDatabaseIfEmpty().catch(err => {
-          console.warn('Database seed check error:', err);
-        });
-      }
     });
 
     try {
@@ -569,7 +602,16 @@ export const CMSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       });
       unsubSettings = subscribeDbSettings(st => {
         if (st && st.siteName) {
-          setSettings(st);
+          // Merge with defaults so partially-populated settings never drop required fields
+          setSettings({
+            ...INITIAL_SITE_SETTINGS,
+            ...st,
+            notificationsEmail: st.notificationsEmail || DEFAULT_NOTIFY_EMAIL,
+            announcement: { ...INITIAL_SITE_SETTINGS.announcement, ...(st.announcement || {}) },
+            hero: { ...INITIAL_SITE_SETTINGS.hero, ...(st.hero || {}) },
+            company: { ...INITIAL_SITE_SETTINGS.company, ...(st.company || {}) },
+            socials: { ...INITIAL_SITE_SETTINGS.socials, ...(st.socials || {}) }
+          });
         }
       });
       unsubTeam = subscribeDbTeamMembers(tm => {
@@ -582,9 +624,9 @@ export const CMSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           setComments(cm);
         }
       });
-      unsubInquiries = subscribeDbInquiries(inq => {
-        if (inq && inq.length > 0) {
-          setUserRequests(inq);
+      unsubServices = subscribeDbServices(sv => {
+        if (sv && sv.length > 0) {
+          setServices(sv);
         }
       });
     } catch (err) {
@@ -597,9 +639,37 @@ export const CMSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       unsubSettings?.();
       unsubTeam?.();
       unsubComments?.();
-      unsubInquiries?.();
+      unsubServices?.();
     };
   }, []);
+
+  // Testimonials: visitors see approved reviews only; admins see the full moderation queue
+  useEffect(() => {
+    const unsub = subscribeDbTestimonials(items => {
+      if (items && (items.length > 0 || isAdmin)) {
+        setTestimonials(items.length > 0 ? items : INITIAL_TESTIMONIALS);
+      }
+    }, isAdmin);
+    return () => unsub();
+  }, [isAdmin]);
+
+  // Admin-only data (private leads & subscribers) + first-run database seeding
+  useEffect(() => {
+    if (!isAdmin) return;
+    seedDatabaseIfEmpty({ services: SERVICES, testimonials: INITIAL_TESTIMONIALS }).catch(err => {
+      console.warn('Database seed check error:', err);
+    });
+    const unsubInquiries = subscribeDbInquiries(inq => {
+      setUserRequests([...inq].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')));
+    });
+    const unsubSubscribers = subscribeDbSubscribers(subs => {
+      setSubscribers(subs);
+    });
+    return () => {
+      unsubInquiries();
+      unsubSubscribers();
+    };
+  }, [isAdmin]);
 
   // Persist Team Members Cache
   useEffect(() => {
@@ -619,22 +689,6 @@ export const CMSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }, [comments]);
 
-  // Admin Auth State
-  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
-    return localStorage.getItem(STORAGE_KEYS.AUTH) === 'true';
-  });
-
-  // Ensure active password matches the configured administrator password
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEYS.PASS);
-      if (!stored || stored === 'admin123' || stored === 'admin' || stored === 'yuvex2025') {
-        localStorage.setItem(STORAGE_KEYS.PASS, DEFAULT_ADMIN_PASS);
-      }
-    } catch (e) {
-      console.error('Failed to initialize admin credentials:', e);
-    }
-  }, []);
 
   // Persist User Requests
   useEffect(() => {
@@ -727,39 +781,12 @@ export const CMSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [settings]);
 
   // Authentication Handlers
-  const loginAdmin = (enteredPass: string): boolean => {
-    const raw = enteredPass;
-    const clean = (enteredPass || '').trim();
-    const storedPass = localStorage.getItem(STORAGE_KEYS.PASS) || DEFAULT_ADMIN_PASS;
+  const loginAdmin = () => signInAdminWithGoogle();
 
-    if (
-      clean === DEFAULT_ADMIN_PASS ||
-      raw === DEFAULT_ADMIN_PASS ||
-      clean === storedPass ||
-      raw === storedPass ||
-      clean === 'admin123' ||
-      clean === 'admin' ||
-      clean === 'yuvex2025'
-    ) {
-      setIsAdmin(true);
-      try {
-        localStorage.setItem(STORAGE_KEYS.AUTH, 'true');
-        localStorage.setItem(STORAGE_KEYS.PASS, DEFAULT_ADMIN_PASS);
-      } catch (e) {
-        console.error('Failed to save auth state:', e);
-      }
-      return true;
-    }
-    return false;
-  };
-
-  const logoutAdmin = () => {
+  const logoutAdmin = async () => {
+    await signOutAdmin();
     setIsAdmin(false);
-    localStorage.removeItem(STORAGE_KEYS.AUTH);
-  };
-
-  const changePassword = (newPass: string) => {
-    localStorage.setItem(STORAGE_KEYS.PASS, newPass);
+    setAdminEmail(null);
   };
 
   // Projects CRUD with Firestore Sync
@@ -849,35 +876,53 @@ export const CMSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Manual Trigger to re-seed or check DB sync
   const syncWithDatabase = async () => {
-    await seedDatabaseIfEmpty();
+    if (isAdmin) await seedDatabaseIfEmpty({ services: SERVICES, testimonials: INITIAL_TESTIMONIALS });
     const isConn = await testConnection();
     setDbConnected(isConn);
   };
 
   // Services CRUD
   const addService = (service: Service) => {
-    setServices(prev => [...prev, service]);
+    setServices(prev => {
+      const next = [...prev, service];
+      saveDbService({ ...service, displayOrder: next.length - 1 } as Service).catch(console.error);
+      return next;
+    });
   };
 
   const updateService = (id: string, updated: Partial<Service>) => {
-    setServices(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s));
+    setServices(prev => {
+      const next = prev.map(s => s.id === id ? { ...s, ...updated } : s);
+      const idx = next.findIndex(s => s.id === id);
+      if (idx >= 0) saveDbService({ ...next[idx], displayOrder: idx } as Service).catch(console.error);
+      return next;
+    });
   };
 
   const deleteService = (id: string) => {
     setServices(prev => prev.filter(s => s.id !== id));
+    deleteDbService(id).catch(console.error);
   };
 
-  // Testimonials CRUD
+  // Testimonials CRUD with Firestore Sync
   const addTestimonial = (item: TestimonialItem) => {
-    setTestimonials(prev => [item, ...prev]);
+    const withStatus = { ...item, status: item.status || 'approved' } as TestimonialItem;
+    setTestimonials(prev => [withStatus, ...prev]);
+    saveDbTestimonial(withStatus).catch(console.error);
   };
 
   const updateTestimonial = (id: string | number, updated: Partial<TestimonialItem>) => {
-    setTestimonials(prev => prev.map(t => t.id === id ? { ...t, ...updated } : t));
+    setTestimonials(prev => {
+      const next = prev.map(t => String(t.id) === String(id) ? { ...t, ...updated } : t);
+      const target = next.find(t => String(t.id) === String(id));
+      if (target) saveDbTestimonial(target).catch(console.error);
+      return next;
+    });
   };
 
   const deleteTestimonial = (id: string | number) => {
-    setTestimonials(prev => prev.filter(t => t.id !== id));
+    setTestimonials(prev => prev.filter(t => String(t.id) !== String(id)));
+    deleteDbTestimonial(id).catch(console.error);
   };
 
   // User Requests / Leads CRUD
@@ -957,8 +1002,15 @@ Notification Target: ${targetEmail}`
 
     newRequest.emailDispatched = dispatched;
 
-    // Immediately update state and save to storage
-    setUserRequests(prev => [newRequest, ...prev]);
+    // Persist to Firestore so the lead reaches the Admin CMS (visitors can create, only admins can read)
+    try {
+      await saveDbInquiry(newRequest);
+    } catch (e) {
+      console.warn('Could not store inquiry in Firestore:', e);
+    }
+
+    // Keep a local copy (admins will receive the live Firestore list instead)
+    if (!isAdmin) setUserRequests(prev => [newRequest, ...prev]);
 
     return {
       success: true,
@@ -969,15 +1021,19 @@ Notification Target: ${targetEmail}`
 
   const updateUserRequestStatus = (id: string, status: UserRequest['status']) => {
     setUserRequests(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+    if (isAdmin) updateDbInquiry(id, { status }).catch(console.error);
   };
 
   const deleteUserRequest = (id: string) => {
     setUserRequests(prev => prev.filter(r => r.id !== id));
+    if (isAdmin) deleteDbInquiry(id).catch(console.error);
   };
 
   const clearAllUserRequests = () => {
+    const ids = userRequests.map(r => r.id);
     setUserRequests([]);
     localStorage.removeItem(STORAGE_KEYS.REQUESTS);
+    if (isAdmin) ids.forEach(id => deleteDbInquiry(id).catch(console.error));
   };
 
   // Submit Client Review & Testimonial
@@ -1005,13 +1061,18 @@ Notification Target: ${targetEmail}`
       tag: (reviewData.tag || 'Client Partner').trim(),
       avatar: fallbackAvatar,
       email: reviewData.email ? reviewData.email.trim() : undefined,
-      status: 'approved',
-      verified: true,
+      status: 'pending',
+      verified: false,
       isClientSubmission: true,
       submittedAt: new Date().toISOString()
     };
 
-    // Store in testimonials list
+    // Store for moderation — it appears publicly once an admin approves it
+    try {
+      await createDbTestimonialSubmission(newTestimonial);
+    } catch (err) {
+      console.warn('Could not store review in Firestore:', err);
+    }
     setTestimonials(prev => [newTestimonial, ...prev]);
 
     // Also record lead/inquiry so Admin receives notification
@@ -1060,7 +1121,7 @@ Notification Target: ${targetEmail}`
     } else {
       isNew = true;
       newOrUpdatedSubscriber = {
-        id: 'sub_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        id: subscriberDocId(cleanEmail),
         email: cleanEmail,
         name: cleanName,
         subscribedAt: new Date().toISOString(),
@@ -1069,6 +1130,18 @@ Notification Target: ${targetEmail}`
         notificationsCount: 0
       };
       setSubscribers(prev => [newOrUpdatedSubscriber, ...prev]);
+    }
+
+    // Persist to Firestore (create-only for visitors; a duplicate email is rejected by the rules)
+    try {
+      if (isAdmin) {
+        await saveDbSubscriber(newOrUpdatedSubscriber);
+      } else {
+        const created = await createDbSubscriber(newOrUpdatedSubscriber);
+        if (!created) isNew = false;
+      }
+    } catch (e) {
+      console.warn('Could not store subscriber in Firestore:', e);
     }
 
     // Automatically record in userRequests as a contact inquiry so it also appears in the contact management area
@@ -1124,7 +1197,9 @@ Notification Target: ${targetEmail}`
 
   const removeSubscriber = (idOrEmail: string) => {
     const target = idOrEmail.toLowerCase();
+    const match = subscribers.find(s => s.id === idOrEmail || s.email.toLowerCase() === target);
     setSubscribers(prev => prev.filter(s => s.id !== idOrEmail && s.email.toLowerCase() !== target));
+    if (isAdmin && match) deleteDbSubscriber(match.id).catch(console.error);
   };
 
   const notifySubscribersNewPost = async (
@@ -1408,8 +1483,8 @@ Ready to auto-post articles and site announcements.`;
     setComments([]);
     setServices(SERVICES);
     setTestimonials(INITIAL_TESTIMONIALS);
-    setUserRequests(INITIAL_USER_REQUESTS);
-    setSubscribers(INITIAL_SUBSCRIBERS);
+    setUserRequests([]);
+    setSubscribers([]);
     setNotificationLogs([]);
     setTelegramConfig(INITIAL_TELEGRAM_CONFIG);
     setTelegramLogs([]);
@@ -1426,11 +1501,6 @@ Ready to auto-post articles and site announcements.`;
     localStorage.removeItem(STORAGE_KEYS.TELEGRAM_CONFIG);
     localStorage.removeItem(STORAGE_KEYS.TELEGRAM_LOGS);
     localStorage.removeItem(STORAGE_KEYS.SETTINGS);
-    try {
-      localStorage.setItem(STORAGE_KEYS.PASS, DEFAULT_ADMIN_PASS);
-    } catch (e) {
-      console.error('Failed to reset admin pass:', e);
-    }
   };
 
   return (
@@ -1451,6 +1521,8 @@ Ready to auto-post articles and site announcements.`;
         dbConnected,
         isAdmin,
         isAuthenticated: isAdmin,
+        adminEmail,
+        authReady,
         syncWithDatabase,
         addTeamMember,
         updateTeamMember,
@@ -1491,7 +1563,6 @@ Ready to auto-post articles and site announcements.`;
         updateSettings,
         loginAdmin,
         logoutAdmin,
-        changePassword,
         exportAllData,
         importAllData,
         resetToDefaults

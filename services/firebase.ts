@@ -13,19 +13,86 @@ import {
   orderBy,
   where,
   getDocFromServer,
-  Firestore
+  Firestore,
+  DocumentReference,
+  SetOptions
 } from 'firebase/firestore';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  User
+} from 'firebase/auth';
 import firebaseConfig from '../firebase-applet-config.json';
-import { BlogPost, Project, SiteSettings, UserRequest, Comment, TeamMember } from '../types';
+import { BlogPost, Project, SiteSettings, UserRequest, Comment, TeamMember, Service, TestimonialItem, NewsletterSubscriber } from '../types';
 import { PROJECTS, BLOG_POSTS } from '../constants';
 
 // Initialize Firebase App singleton
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 // Initialize Firestore targeting the specific database ID if configured
 export const db: Firestore = firebaseConfig.firestoreDatabaseId
   ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
   : getFirestore(app);
+
+// ==========================================
+// ADMIN AUTHENTICATION (Firebase Auth + Google)
+// ==========================================
+/**
+ * Google accounts allowed to manage the CMS.
+ * Keep this list in sync with isAdmin() in firestore.rules.
+ */
+export const ADMIN_EMAILS = ['yuvextech@gmail.com', 'ywapne@gmail.com', 'yovses@gmail.com'];
+
+export const auth = getAuth(app);
+
+export function isAdminUser(user: User | null): boolean {
+  return !!user && !!user.email && user.emailVerified && ADMIN_EMAILS.includes(user.email.toLowerCase());
+}
+
+export async function signInAdminWithGoogle(): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    const result = await signInWithPopup(auth, provider);
+    if (!isAdminUser(result.user)) {
+      await signOut(auth);
+      return { ok: false, error: `${result.user.email || 'This account'} is not authorized to manage this site.` };
+    }
+    return { ok: true };
+  } catch (err: any) {
+    const code: string = err?.code || '';
+    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+      return { ok: false, error: 'Sign-in was cancelled.' };
+    }
+    if (code === 'auth/unauthorized-domain') {
+      return { ok: false, error: 'This domain is not authorized in Firebase Authentication. Add it under Authentication → Settings → Authorized domains.' };
+    }
+    if (code === 'auth/operation-not-allowed') {
+      return { ok: false, error: 'Google sign-in is not enabled. Enable it in Firebase Console → Authentication → Sign-in method.' };
+    }
+    return { ok: false, error: err?.message || 'Sign-in failed. Please try again.' };
+  }
+}
+
+export function signOutAdmin(): Promise<void> {
+  return signOut(auth);
+}
+
+export function subscribeAuth(callback: (user: User | null) => void) {
+  return onAuthStateChanged(auth, callback);
+}
+
+// Firestore rejects `undefined` field values, so strip them before every write.
+function clean<T>(data: T): T {
+  return JSON.parse(JSON.stringify(data));
+}
+
+function setClean(ref: DocumentReference, data: any, options?: SetOptions) {
+  return options ? setDoc(ref, clean(data), options) : setDoc(ref, clean(data));
+}
 
 // Initial Team Members Seed Data
 export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
@@ -146,8 +213,6 @@ export async function testConnection(): Promise<boolean> {
   }
 }
 
-// Immediately trigger connection probe
-testConnection().catch(() => {});
 
 // ==========================================
 // 1. POSTS (ARTICLES & TECH NEWS)
@@ -165,7 +230,7 @@ export async function getDbPosts(): Promise<BlogPost[]> {
 
 export async function saveDbPost(post: BlogPost): Promise<void> {
   const docRef = doc(db, 'posts', post.id);
-  await setDoc(docRef, { ...post, updatedAt: new Date().toISOString() }, { merge: true });
+  await setClean(docRef, { ...post, updatedAt: new Date().toISOString() }, { merge: true });
 }
 
 export async function deleteDbPost(id: string): Promise<void> {
@@ -199,7 +264,7 @@ export async function getDbComments(postId?: string): Promise<Comment[]> {
 export async function addDbComment(comment: Comment): Promise<void> {
   const commentId = comment.id || `cmt_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
   const docRef = doc(db, 'comments', commentId);
-  await setDoc(docRef, {
+  await setClean(docRef, {
     ...comment,
     id: commentId,
     createdAt: comment.createdAt || Date.now()
@@ -238,7 +303,7 @@ export async function getDbSettings(): Promise<SiteSettings | null> {
 }
 
 export async function saveDbSettings(settings: SiteSettings): Promise<void> {
-  await setDoc(doc(db, 'cpanel_settings', 'general'), {
+  await setClean(doc(db, 'cpanel_settings', 'general'), {
     ...settings,
     updatedAt: new Date().toISOString()
   }, { merge: true });
@@ -271,7 +336,7 @@ export async function getDbTeamMembers(): Promise<TeamMember[]> {
 
 export async function saveDbTeamMember(member: TeamMember): Promise<void> {
   const id = member.id || `team_${Date.now()}`;
-  await setDoc(doc(db, 'team_members', id), { ...member, id }, { merge: true });
+  await setClean(doc(db, 'team_members', id), { ...member, id }, { merge: true });
 }
 
 export async function deleteDbTeamMember(id: string): Promise<void> {
@@ -303,7 +368,7 @@ export async function getDbProjects(): Promise<Project[]> {
 }
 
 export async function saveDbProject(project: Project): Promise<void> {
-  await setDoc(doc(db, 'projects', project.id), project, { merge: true });
+  await setClean(doc(db, 'projects', project.id), project, { merge: true });
 }
 
 export async function deleteDbProject(id: string): Promise<void> {
@@ -333,7 +398,7 @@ export async function getDbInquiries(): Promise<UserRequest[]> {
 }
 
 export async function saveDbInquiry(inquiry: UserRequest): Promise<void> {
-  await setDoc(doc(db, 'inquiries', inquiry.id), inquiry, { merge: true });
+  await setClean(doc(db, 'inquiries', inquiry.id), inquiry, { merge: true });
 }
 
 export function subscribeDbInquiries(callback: (inquiries: UserRequest[]) => void) {
@@ -345,11 +410,104 @@ export function subscribeDbInquiries(callback: (inquiries: UserRequest[]) => voi
   });
 }
 
+export async function updateDbInquiry(id: string, updated: Partial<UserRequest>): Promise<void> {
+  await setClean(doc(db, 'inquiries', id), updated, { merge: true });
+}
+
+export async function deleteDbInquiry(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'inquiries', id));
+}
+
+// ==========================================
+// 7. SERVICES
+// ==========================================
+export async function saveDbService(service: Service): Promise<void> {
+  await setClean(doc(db, 'services', service.id), service, { merge: true });
+}
+
+export async function deleteDbService(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'services', id));
+}
+
+export function subscribeDbServices(callback: (services: Service[]) => void) {
+  return onSnapshot(collection(db, 'services'), (snap) => {
+    const list = snap.docs.map(d => ({ ...(d.data() as Service), id: d.id }));
+    list.sort((a: any, b: any) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+    callback(list);
+  }, (err) => {
+    console.error('Services subscription error:', err);
+  });
+}
+
+// ==========================================
+// 8. TESTIMONIALS (public sees approved only)
+// ==========================================
+export async function saveDbTestimonial(item: TestimonialItem): Promise<void> {
+  await setClean(doc(db, 'testimonials', String(item.id)), { ...item, id: String(item.id) }, { merge: true });
+}
+
+export async function createDbTestimonialSubmission(item: TestimonialItem): Promise<void> {
+  // Public submissions are create-only and must be pending (enforced in firestore.rules)
+  await setClean(doc(db, 'testimonials', String(item.id)), { ...item, id: String(item.id), status: 'pending', verified: false });
+}
+
+export async function deleteDbTestimonial(id: string | number): Promise<void> {
+  await deleteDoc(doc(db, 'testimonials', String(id)));
+}
+
+export function subscribeDbTestimonials(callback: (items: TestimonialItem[]) => void, includeUnapproved: boolean) {
+  const colRef = collection(db, 'testimonials');
+  const q = includeUnapproved ? colRef : query(colRef, where('status', '==', 'approved'));
+  return onSnapshot(q, (snap) => {
+    const list = snap.docs.map(d => ({ ...(d.data() as TestimonialItem), id: d.id }));
+    list.sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''));
+    callback(list);
+  }, (err) => {
+    console.error('Testimonials subscription error:', err);
+  });
+}
+
+// ==========================================
+// 9. NEWSLETTER SUBSCRIBERS (admin read only)
+// ==========================================
+export function subscriberDocId(email: string): string {
+  return 'sub_' + email.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
+}
+
+/** Returns false when the email is already subscribed (create-only rule rejects the write). */
+export async function createDbSubscriber(sub: NewsletterSubscriber): Promise<boolean> {
+  try {
+    await setClean(doc(db, 'subscribers', subscriberDocId(sub.email)), { ...sub, id: subscriberDocId(sub.email) });
+    return true;
+  } catch (err: any) {
+    if (err?.code === 'permission-denied') return false;
+    throw err;
+  }
+}
+
+export async function saveDbSubscriber(sub: NewsletterSubscriber): Promise<void> {
+  await setClean(doc(db, 'subscribers', sub.id), sub, { merge: true });
+}
+
+export async function deleteDbSubscriber(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'subscribers', id));
+}
+
+export function subscribeDbSubscribers(callback: (subs: NewsletterSubscriber[]) => void) {
+  return onSnapshot(collection(db, 'subscribers'), (snap) => {
+    const list = snap.docs.map(d => ({ ...(d.data() as NewsletterSubscriber), id: d.id }));
+    list.sort((a, b) => (b.subscribedAt || '').localeCompare(a.subscribedAt || ''));
+    callback(list);
+  }, (err) => {
+    console.error('Subscribers subscription error:', err);
+  });
+}
+
 // ==========================================
 // DATABASE INITIAL SEEDER
 // ==========================================
 let isSeeding = false;
-export async function seedDatabaseIfEmpty(): Promise<void> {
+export async function seedDatabaseIfEmpty(extra?: { services?: Service[]; testimonials?: TestimonialItem[] }): Promise<void> {
   if (isSeeding) return;
   isSeeding = true;
 
@@ -359,7 +517,7 @@ export async function seedDatabaseIfEmpty(): Promise<void> {
     if (postsSnap.empty) {
       console.log('Seeding initial blog posts to Firestore...');
       for (const p of BLOG_POSTS) {
-        await setDoc(doc(db, 'posts', p.id), p);
+        await setClean(doc(db, 'posts', p.id), p);
       }
     }
 
@@ -368,7 +526,7 @@ export async function seedDatabaseIfEmpty(): Promise<void> {
     if (projectsSnap.empty) {
       console.log('Seeding initial projects to Firestore...');
       for (const pr of PROJECTS) {
-        await setDoc(doc(db, 'projects', pr.id), pr);
+        await setClean(doc(db, 'projects', pr.id), pr);
       }
     }
 
@@ -376,7 +534,7 @@ export async function seedDatabaseIfEmpty(): Promise<void> {
     const settingsSnap = await getDoc(doc(db, 'cpanel_settings', 'general'));
     if (!settingsSnap.exists()) {
       console.log('Seeding initial CPanel settings to Firestore...');
-      await setDoc(doc(db, 'cpanel_settings', 'general'), INITIAL_CPANEL_SETTINGS);
+      await setClean(doc(db, 'cpanel_settings', 'general'), INITIAL_CPANEL_SETTINGS);
     }
 
     // 4. Check & Seed Team Members
@@ -384,7 +542,28 @@ export async function seedDatabaseIfEmpty(): Promise<void> {
     if (teamSnap.empty) {
       console.log('Seeding initial team members to Firestore...');
       for (const member of INITIAL_TEAM_MEMBERS) {
-        await setDoc(doc(db, 'team_members', member.id), member);
+        await setClean(doc(db, 'team_members', member.id), member);
+      }
+    }
+
+    // 5. Check & Seed Services
+    if (extra?.services?.length) {
+      const servicesSnap = await getDocs(collection(db, 'services'));
+      if (servicesSnap.empty) {
+        let order = 0;
+        for (const sv of extra.services) {
+          await setClean(doc(db, 'services', sv.id), { ...sv, displayOrder: order++ });
+        }
+      }
+    }
+
+    // 6. Check & Seed Testimonials
+    if (extra?.testimonials?.length) {
+      const testimonialsSnap = await getDocs(collection(db, 'testimonials'));
+      if (testimonialsSnap.empty) {
+        for (const t of extra.testimonials) {
+          await setClean(doc(db, 'testimonials', String(t.id)), { ...t, id: String(t.id), status: t.status || 'approved' });
+        }
       }
     }
   } catch (err) {

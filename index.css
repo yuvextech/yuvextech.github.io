@@ -1,6 +1,44 @@
 /* Yuvex Tech Styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @layer base {
   html {
     scroll-behavior: smooth;
   }
+  body {
+    @apply font-['Inter'] bg-white text-gray-900 dark:bg-gray-950 dark:text-[#f9fafb] antialiased transition-colors duration-500;
+  }
+  section {
+    scroll-margin-top: 100px;
+  }
 }
+
+@layer components {
+  .glass {
+    @apply bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl border border-gray-200 dark:border-white/[0.08] shadow-sm dark:shadow-none;
+  }
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400;
+  }
+  .mask-fade {
+    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-marquee { animation: marquee 30s linear infinite; }
+.pause-on-hover:hover .animate-marquee { animation-play-state: paused; }
+
+/* Reserve space for the fixed announcement bar (height published by AnnouncementBar) */
+#root { padding-top: var(--announce-h, 0px); }
