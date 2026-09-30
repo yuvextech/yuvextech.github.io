@@ -156,7 +156,7 @@ const AppContent: React.FC = () => {
   // Dynamic URL Resolution & History Listener
   useEffect(() => {
     const resolveLocation = () => {
-      const pathname = window.location.pathname.replace(/^\/+/, '');
+      const pathname = window.location.pathname.replace(/^\/+/, '').replace(/\/+$/, '');
       const hash = window.location.hash.replace(/^#\/?/, '');
       const fullPath = pathname || hash;
 
