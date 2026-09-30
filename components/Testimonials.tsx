@@ -3,7 +3,9 @@ import { useCMS } from '../context/CMSContext';
 import SubmitReviewModal from './SubmitReviewModal';
 
 const Testimonials: React.FC = () => {
-  const { testimonials } = useCMS();
+  const { testimonials: allTestimonials } = useCMS();
+  // Only approved reviews are shown publicly (legacy items without a status count as approved)
+  const testimonials = allTestimonials.filter(t => !t.status || t.status === 'approved');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);

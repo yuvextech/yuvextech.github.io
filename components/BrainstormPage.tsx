@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { GoogleGenAI } from '@google/genai';
+import { generateText } from '../services/ai';
 
 interface BrainstormPageProps {
   onBack: () => void;
@@ -60,10 +60,7 @@ const BrainstormPage: React.FC<BrainstormPageProps> = ({ onBack, onContact }) =>
     if (!targetIdea) setIdea('');
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `You are a Senior Technical Architect at Yuvex Tech. 
+      const response = await generateText(`You are a Senior Technical Architect at Yuvex Tech. 
         A client has a project idea: "${activeIdea}". 
         
         Provide a professional "Technical Blueprint" that includes:
@@ -73,11 +70,8 @@ const BrainstormPage: React.FC<BrainstormPageProps> = ({ onBack, onContact }) =>
         4. One "Killer Feature" that would make this project stand out.
         
         Keep it concise, professional, and exciting. Use Markdown formatting.`,
-        config: {
-          temperature: 0.8,
-          maxOutputTokens: 500,
-        }
-      });
+        { temperature: 0.8, maxOutputTokens: 2048 }
+      );
 
       const text = response.text || 'Sorry, I could not generate a suggestion right now.';
       setSuggestion(text);

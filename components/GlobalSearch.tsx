@@ -249,7 +249,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ onNavigate, isOpen: 
           />
         </svg>
 
-        <span className="hidden xl:inline font-medium text-gray-400 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300">
+        <span className="hidden 2xl:inline font-medium text-gray-400 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300">
           Search...
         </span>
 

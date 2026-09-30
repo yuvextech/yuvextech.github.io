@@ -8,7 +8,9 @@ interface TestimonialsPageProps {
 }
 
 const TestimonialsPage: React.FC<TestimonialsPageProps> = ({ onBack, onContact }) => {
-  const { testimonials } = useCMS();
+  const { testimonials: allTestimonials } = useCMS();
+  // Only approved reviews are shown publicly (legacy items without a status count as approved)
+  const testimonials = allTestimonials.filter(t => !t.status || t.status === 'approved');
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string>('all');
 
