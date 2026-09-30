@@ -87,6 +87,25 @@ export interface Comment {
   text: string;
   date: string;
   avatar: string;
+  postId?: string;
+  email?: string;
+  createdAt?: number;
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  image: string;
+  skills?: string[];
+  socialLinks?: {
+    twitter?: string;
+    linkedin?: string;
+    github?: string;
+  };
+  displayOrder?: number;
+  isPublished?: boolean;
 }
 
 export interface BlogPost {

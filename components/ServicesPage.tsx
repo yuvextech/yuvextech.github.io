@@ -1,6 +1,8 @@
 
 import React, { useEffect } from 'react';
 import { useCMS } from '../context/CMSContext';
+import Breadcrumbs from './Breadcrumbs';
+import { buildDynamicUrl } from '../utils/seo';
 
 interface ServicesPageProps {
   onBack: () => void;
@@ -39,9 +41,17 @@ const ServicesPage: React.FC<ServicesPageProps> = ({ onBack, onContact }) => {
   return (
     <div className="pt-32 pb-24 min-h-screen bg-white dark:bg-gray-950 transition-colors duration-500">
       <div className="container mx-auto px-6">
+        <Breadcrumbs
+          items={[
+            { label: 'Home', onClick: onBack },
+            { label: 'Services', active: true }
+          ]}
+          canonicalUrl={buildDynamicUrl('services')}
+        />
+
         <button 
           onClick={onBack}
-          className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white mb-12 transition-all group font-bold"
+          className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white mb-10 transition-all group font-bold"
         >
           <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />

@@ -4,6 +4,8 @@ import { useCMS } from '../context/CMSContext';
 import { BlogPost, Comment } from '../types';
 import NewsletterSection from './NewsletterSection';
 import MarkdownContent from './MarkdownContent';
+import Breadcrumbs from './Breadcrumbs';
+import { buildDynamicUrl } from '../utils/seo';
 
 const READ_STORAGE_KEY = 'yuvex_read_posts';
 const COMMENTS_STORAGE_KEY = 'yuvex_blog_comments';
@@ -27,13 +29,13 @@ interface BlogPageProps {
 }
 
 const BlogPage: React.FC<BlogPageProps> = ({ onBack, onSelectPost, initialPostId }) => {
-  const { blogPosts } = useCMS();
+  const { blogPosts, comments: globalComments, addComment } = useCMS();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [readPosts, setReadPosts] = useState<Set<string>>(new Set());
   const [readProgress, setReadProgress] = useState<Record<string, number>>({});
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
-  const [comments, setComments] = useState<Record<string, Comment[]>>({});
+  const [commentAuthor, setCommentAuthor] = useState('');
   const [newComment, setNewComment] = useState('');
   const [commentPage, setCommentPage] = useState(1);
   const [isFilterLoading, setIsFilterLoading] = useState(false);
@@ -63,13 +65,6 @@ const BlogPage: React.FC<BlogPageProps> = ({ onBack, onSelectPost, initialPostId
       try {
         const parsed = JSON.parse(savedRead);
         if (Array.isArray(parsed)) setReadPosts(new Set(parsed));
-      } catch (e) {}
-    }
-
-    const savedComments = localStorage.getItem(COMMENTS_STORAGE_KEY);
-    if (savedComments) {
-      try {
-        setComments(JSON.parse(savedComments));
       } catch (e) {}
     }
 
@@ -123,21 +118,18 @@ const BlogPage: React.FC<BlogPageProps> = ({ onBack, onSelectPost, initialPostId
     });
   }, [searchQuery, activeCategory, blogPosts]);
 
-  const handleAddComment = (e: React.FormEvent) => {
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !selectedPost) return;
-    const comment: Comment = {
-      id: Date.now().toString(),
-      author: 'Tech Innovator',
+    const author = commentAuthor.trim() || 'Tech Innovator';
+    await addComment({
+      postId: selectedPost.id,
+      author,
       text: newComment.trim(),
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      avatar: `https://i.pravatar.cc/100?u=user-${Math.floor(Math.random() * 1000)}`
-    };
-    setComments(prev => ({
-      ...prev,
-      [selectedPost.id]: [comment, ...(prev[selectedPost.id] || [])]
-    }));
+      avatar: `https://i.pravatar.cc/100?u=${encodeURIComponent(author)}`
+    });
     setNewComment('');
+    setCommentAuthor('');
     setCommentPage(1);
   };
 
@@ -151,9 +143,18 @@ const BlogPage: React.FC<BlogPageProps> = ({ onBack, onSelectPost, initialPostId
           />
         </div>
         <div className="container mx-auto px-6 max-w-4xl">
+          <Breadcrumbs
+            items={[
+              { label: 'Home', onClick: onBack },
+              { label: 'Knowledge Base', onClick: () => setSelectedPost(null) },
+              { label: selectedPost.title, active: true }
+            ]}
+            canonicalUrl={buildDynamicUrl('blog', selectedPost.id)}
+          />
+
           <button 
             onClick={() => setSelectedPost(null)}
-            className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white mb-12 transition-all font-bold group"
+            className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white mb-10 transition-all font-bold group"
           >
             <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -191,35 +192,55 @@ const BlogPage: React.FC<BlogPageProps> = ({ onBack, onSelectPost, initialPostId
           </article>
 
           <div className="border-t border-gray-100 dark:border-white/5 pt-16">
-            <h3 className="text-3xl font-black mb-10 text-gray-900 dark:text-white">Discussion</h3>
-            <form onSubmit={handleAddComment} className="mb-12">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-3xl font-black text-gray-900 dark:text-white">Discussion</h3>
+              <span className="text-xs font-mono px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20">
+                ⚡ Real-Time Cloud Sync
+              </span>
+            </div>
+
+            <form onSubmit={handleAddComment} className="mb-12 space-y-3">
+              <input 
+                type="text"
+                value={commentAuthor}
+                onChange={(e) => setCommentAuthor(e.target.value)}
+                placeholder="Your Name (e.g., Alex Vance)"
+                className="w-full sm:w-80 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-6 py-3 text-sm focus:outline-none focus:border-blue-500 transition-all text-gray-900 dark:text-white"
+              />
               <textarea 
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Share your thoughts..."
-                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-6 focus:outline-none focus:border-blue-500 transition-all min-h-[150px] resize-none text-gray-900 dark:text-white"
+                placeholder="Share your thoughts on this technical architecture or topic..."
+                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-6 focus:outline-none focus:border-blue-500 transition-all min-h-[140px] resize-none text-gray-900 dark:text-white text-sm"
               />
               <button 
                 type="submit"
                 disabled={!newComment.trim()}
-                className="mt-4 px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl shadow-xl shadow-blue-600/20 active:scale-95 transition-all"
+                className="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold rounded-2xl shadow-xl shadow-blue-600/20 active:scale-95 transition-all text-sm"
               >
-                Post Comment
+                Post Comment to Cloud Database
               </button>
             </form>
-            <div className="space-y-8">
-              {(comments[selectedPost.id] || []).map(comment => (
-                <div key={comment.id} className="flex gap-6 p-8 bg-gray-50 dark:bg-white/5 rounded-[40px] border border-gray-100 dark:border-white/10">
-                  <img src={comment.avatar} className="w-12 h-12 rounded-full shrink-0" alt={comment.author} />
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-black text-gray-900 dark:text-white">{comment.author}</span>
-                      <span className="text-xs text-gray-500">{comment.date}</span>
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-400">{comment.text}</p>
-                  </div>
+
+            <div className="space-y-6">
+              {globalComments.filter(c => c.postId === selectedPost.id).length === 0 ? (
+                <div className="p-8 rounded-3xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 text-center text-gray-400 text-sm">
+                  No comments on this article yet. Be the first to start the discussion!
                 </div>
-              ))}
+              ) : (
+                globalComments.filter(c => c.postId === selectedPost.id).map(comment => (
+                  <div key={comment.id} className="flex gap-5 p-6 sm:p-8 bg-gray-50 dark:bg-white/5 rounded-[32px] border border-gray-100 dark:border-white/10">
+                    <img src={comment.avatar} className="w-11 h-11 rounded-full shrink-0" alt={comment.author} />
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-bold text-gray-900 dark:text-white">{comment.author}</span>
+                        <span className="text-xs text-gray-400 font-mono">{comment.date}</span>
+                      </div>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">{comment.text}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

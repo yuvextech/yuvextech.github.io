@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useCMS } from '../context/CMSContext';
 import { Project } from '../types';
+import { buildDynamicUrl } from '../utils/seo';
+import { copyToClipboard } from '../utils/clipboard';
 
 interface ExploreDetailsPageProps {
   selectedId?: string | null;
@@ -61,9 +63,9 @@ const ExploreDetailsPage: React.FC<ExploreDetailsPageProps> = ({
     setActiveGalleryIndex(0);
   }, [currentProject.id]);
 
-  const handleCopyCode = (code: string) => {
+  const handleCopyCode = async (code: string) => {
     try {
-      navigator.clipboard.writeText(code);
+      await copyToClipboard(code);
       setCopiedCode(true);
       setTimeout(() => setCopiedCode(false), 2000);
     } catch (e) {
@@ -71,22 +73,21 @@ const ExploreDetailsPage: React.FC<ExploreDetailsPageProps> = ({
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     try {
+      const shareUrl = buildDynamicUrl('project', currentProject.id);
       if (navigator.share) {
         navigator.share({
           title: `${currentProject.title} | Yuvex Tech Explore Details`,
           text: currentProject.description,
-          url: window.location.href,
-        }).catch(() => {
-          if (navigator.clipboard) {
-            navigator.clipboard.writeText(window.location.href);
-            setShareCopied(true);
-            setTimeout(() => setShareCopied(false), 2500);
-          }
+          url: shareUrl,
+        }).catch(async () => {
+          await copyToClipboard(shareUrl);
+          setShareCopied(true);
+          setTimeout(() => setShareCopied(false), 2500);
         });
-      } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(window.location.href);
+      } else {
+        await copyToClipboard(shareUrl);
         setShareCopied(true);
         setTimeout(() => setShareCopied(false), 2500);
       }

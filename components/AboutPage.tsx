@@ -1,5 +1,9 @@
 
 import React, { useEffect } from 'react';
+import Breadcrumbs from './Breadcrumbs';
+import { buildDynamicUrl } from '../utils/seo';
+import { useCMS } from '../context/CMSContext';
+import { TeamMember } from '../types';
 
 interface AboutPageProps {
   onBack: () => void;
@@ -24,28 +28,45 @@ const VALUES = [
   }
 ];
 
-const TEAM = [
+const TEAM: TeamMember[] = [
   {
+    id: 'team_def_1',
     name: 'Julian Vance',
     role: 'Founder & Head of Engineering',
     image: 'https://i.pravatar.cc/300?u=julian',
-    bio: 'Ex-FAANG architect with a passion for high-performance distributed systems.'
+    bio: 'Ex-FAANG architect with a passion for high-performance distributed systems.',
+    skills: ['Distributed Systems', 'Cloud Architecture', 'TypeScript'],
+    displayOrder: 1,
+    isPublished: true
   },
   {
+    id: 'team_def_2',
     name: 'Elena Kostic',
     role: 'Director of Design',
     image: 'https://i.pravatar.cc/300?u=elena_design',
-    bio: 'Award-winning UI/UX specialist focused on emotional resonance in digital products.'
+    bio: 'Award-winning UI/UX specialist focused on emotional resonance in digital products.',
+    skills: ['Design Systems', 'Figma', 'Micro-interactions'],
+    displayOrder: 2,
+    isPublished: true
   },
   {
+    id: 'team_def_3',
     name: 'Marcus Thorne',
     role: 'Lead AI Architect',
     image: 'https://i.pravatar.cc/300?u=marcus_ai',
-    bio: 'Pioneer in LLM integration and intelligent workflow automation.'
+    bio: 'Pioneer in LLM integration and intelligent workflow automation.',
+    skills: ['Gemini 2.5 / 3.0', 'Embeddings', 'Python'],
+    displayOrder: 3,
+    isPublished: true
   }
 ];
 
 const AboutPage: React.FC<AboutPageProps> = ({ onBack, onContact }) => {
+  const { teamMembers } = useCMS();
+  const displayTeam = teamMembers && teamMembers.length > 0 
+    ? teamMembers.filter(m => m.isPublished !== false) 
+    : TEAM;
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -53,9 +74,17 @@ const AboutPage: React.FC<AboutPageProps> = ({ onBack, onContact }) => {
   return (
     <div className="pt-32 pb-24 min-h-screen bg-white dark:bg-gray-950 transition-colors duration-500">
       <div className="container mx-auto px-6">
+        <Breadcrumbs
+          items={[
+            { label: 'Home', onClick: onBack },
+            { label: 'About Us', active: true }
+          ]}
+          canonicalUrl={buildDynamicUrl('about')}
+        />
+
         <button 
           onClick={onBack}
-          className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white mb-12 transition-all group font-bold"
+          className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white mb-10 transition-all group font-bold"
         >
           <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -120,19 +149,29 @@ const AboutPage: React.FC<AboutPageProps> = ({ onBack, onContact }) => {
         {/* Team Section */}
         <section className="mb-32">
           <div className="text-center mb-16">
+            <span className="text-xs font-mono uppercase tracking-widest text-blue-500 font-bold block mb-2">Leadership & Engineering</span>
             <h3 className="text-4xl font-bold text-gray-900 dark:text-white">The Architects</h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {TEAM.map((member, idx) => (
-              <div key={idx} className="group">
-                <div className="relative overflow-hidden rounded-[40px] aspect-[4/5] mb-6 border border-gray-100 dark:border-white/10 shadow-lg">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {displayTeam.map((member, idx) => (
+              <div key={member.id || idx} className="group">
+                <div className="relative overflow-hidden rounded-[36px] aspect-[4/5] mb-5 border border-gray-100 dark:border-white/10 shadow-lg bg-gray-100 dark:bg-white/5">
                   <img src={member.image} alt={member.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-8 flex flex-col justify-end">
-                    <p className="text-white text-sm italic">"{member.bio}"</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-gray-950/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-6 flex flex-col justify-end">
+                    <p className="text-white text-xs italic leading-relaxed">"{member.bio}"</p>
+                    {member.skills && member.skills.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-3">
+                        {member.skills.slice(0, 3).map((skill, sIdx) => (
+                          <span key={sIdx} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/30 text-blue-200 border border-blue-400/30">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
-                <h4 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{member.name}</h4>
-                <p className="text-blue-600 dark:text-blue-400 font-bold text-sm uppercase tracking-wider">{member.role}</p>
+                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-0.5">{member.name}</h4>
+                <p className="text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-wider">{member.role}</p>
               </div>
             ))}
           </div>

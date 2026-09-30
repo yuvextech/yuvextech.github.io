@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Project, BlogPost, Service, TestimonialItem, SiteSettings, UserRequest, NewsletterSubscriber, PostNotificationLog, TelegramConfig, TelegramTarget, TelegramDispatchLog } from '../types';
+import { Project, BlogPost, Service, TestimonialItem, SiteSettings, UserRequest, NewsletterSubscriber, PostNotificationLog, TelegramConfig, TelegramTarget, TelegramDispatchLog, Comment, TeamMember } from '../types';
 import { PROJECTS, BLOG_POSTS, SERVICES } from '../constants';
 import {
   broadcastBlogPost,
@@ -9,6 +9,27 @@ import {
   testTelegramChatAccess,
   sendTelegramMessage
 } from '../services/telegramService';
+import {
+  saveDbPost,
+  deleteDbPost,
+  subscribeDbPosts,
+  saveDbProject,
+  deleteDbProject,
+  subscribeDbProjects,
+  saveDbSettings,
+  subscribeDbSettings,
+  saveDbTeamMember,
+  deleteDbTeamMember,
+  subscribeDbTeamMembers,
+  addDbComment,
+  deleteDbComment,
+  subscribeDbComments,
+  saveDbInquiry,
+  subscribeDbInquiries,
+  seedDatabaseIfEmpty,
+  testConnection,
+  INITIAL_TEAM_MEMBERS
+} from '../services/firebase';
 
 export const DEFAULT_NOTIFY_EMAIL = 'ywapne@gmail.com';
 
@@ -214,6 +235,8 @@ const STORAGE_KEYS = {
   NOTIFICATION_LOGS: 'yuvex_cms_notification_logs_v1',
   TELEGRAM_CONFIG: 'yuvex_cms_telegram_config_v1',
   TELEGRAM_LOGS: 'yuvex_cms_telegram_logs_v1',
+  TEAM_MEMBERS: 'yuvex_cms_team_members_v1',
+  COMMENTS: 'yuvex_cms_comments_v1',
   AUTH: 'yuvex_cms_admin_auth',
   PASS: 'yuvex_cms_admin_pass'
 };
@@ -231,8 +254,24 @@ interface CMSContextType {
   notificationLogs: PostNotificationLog[];
   telegramConfig: TelegramConfig;
   telegramLogs: TelegramDispatchLog[];
+  teamMembers: TeamMember[];
+  comments: Comment[];
+  dbConnected: boolean;
   isAdmin: boolean;
   isAuthenticated: boolean;
+
+  // Database actions
+  syncWithDatabase: () => Promise<void>;
+
+  // Team Members CRUD
+  addTeamMember: (member: TeamMember) => Promise<void>;
+  updateTeamMember: (id: string, updated: Partial<TeamMember>) => Promise<void>;
+  deleteTeamMember: (id: string) => Promise<void>;
+
+  // Comments CRUD
+  addComment: (comment: Omit<Comment, 'id' | 'date'> & Partial<Comment>) => Promise<void>;
+  deleteComment: (id: string) => Promise<void>;
+  getCommentsForPost: (postId: string) => Comment[];
   
   // Projects CRUD
   addProject: (project: Project) => void;
@@ -468,6 +507,118 @@ export const CMSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return INITIAL_SITE_SETTINGS;
   });
 
+  // Team Members State
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.TEAM_MEMBERS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to load team members from storage:', e);
+    }
+    return INITIAL_TEAM_MEMBERS;
+  });
+
+  // Comments State
+  const [comments, setComments] = useState<Comment[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.COMMENTS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to load comments from storage:', e);
+    }
+    return [];
+  });
+
+  // Cloud Database Connectivity State
+  const [dbConnected, setDbConnected] = useState<boolean>(true);
+
+  // Firestore Real-Time Subscriptions & Auto-Seeding
+  useEffect(() => {
+    let unsubPosts: (() => void) | undefined;
+    let unsubProjects: (() => void) | undefined;
+    let unsubSettings: (() => void) | undefined;
+    let unsubTeam: (() => void) | undefined;
+    let unsubComments: (() => void) | undefined;
+    let unsubInquiries: (() => void) | undefined;
+
+    testConnection().then(connected => {
+      setDbConnected(connected);
+      if (connected) {
+        seedDatabaseIfEmpty().catch(err => {
+          console.warn('Database seed check error:', err);
+        });
+      }
+    });
+
+    try {
+      unsubPosts = subscribeDbPosts(posts => {
+        if (posts && posts.length > 0) {
+          setBlogPosts(posts);
+        }
+      });
+      unsubProjects = subscribeDbProjects(prjs => {
+        if (prjs && prjs.length > 0) {
+          setProjects(prjs);
+        }
+      });
+      unsubSettings = subscribeDbSettings(st => {
+        if (st && st.siteName) {
+          setSettings(st);
+        }
+      });
+      unsubTeam = subscribeDbTeamMembers(tm => {
+        if (tm && tm.length > 0) {
+          setTeamMembers(tm);
+        }
+      });
+      unsubComments = subscribeDbComments(cm => {
+        if (cm) {
+          setComments(cm);
+        }
+      });
+      unsubInquiries = subscribeDbInquiries(inq => {
+        if (inq && inq.length > 0) {
+          setUserRequests(inq);
+        }
+      });
+    } catch (err) {
+      console.error('Firestore subscription error:', err);
+    }
+
+    return () => {
+      unsubPosts?.();
+      unsubProjects?.();
+      unsubSettings?.();
+      unsubTeam?.();
+      unsubComments?.();
+      unsubInquiries?.();
+    };
+  }, []);
+
+  // Persist Team Members Cache
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.TEAM_MEMBERS, JSON.stringify(teamMembers));
+    } catch (e) {
+      console.error('Failed to persist team members:', e);
+    }
+  }, [teamMembers]);
+
+  // Persist Comments Cache
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.COMMENTS, JSON.stringify(comments));
+    } catch (e) {
+      console.error('Failed to persist comments:', e);
+    }
+  }, [comments]);
+
   // Admin Auth State
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
     return localStorage.getItem(STORAGE_KEYS.AUTH) === 'true';
@@ -611,30 +762,96 @@ export const CMSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     localStorage.setItem(STORAGE_KEYS.PASS, newPass);
   };
 
-  // Projects CRUD
+  // Projects CRUD with Firestore Sync
   const addProject = (newProject: Project) => {
     setProjects(prev => [newProject, ...prev]);
+    saveDbProject(newProject).catch(console.error);
   };
 
   const updateProject = (id: string, updated: Partial<Project>) => {
-    setProjects(prev => prev.map(p => p.id === id ? { ...p, ...updated } : p));
+    setProjects(prev => {
+      const next = prev.map(p => p.id === id ? { ...p, ...updated } : p);
+      const target = next.find(p => p.id === id);
+      if (target) saveDbProject(target).catch(console.error);
+      return next;
+    });
   };
 
   const deleteProject = (id: string) => {
     setProjects(prev => prev.filter(p => p.id !== id));
+    deleteDbProject(id).catch(console.error);
   };
 
-  // Tech News / Blog CRUD
+  // Tech News / Blog CRUD with Firestore Sync
   const addBlogPost = (post: BlogPost) => {
     setBlogPosts(prev => [post, ...prev]);
+    saveDbPost(post).catch(console.error);
   };
 
   const updateBlogPost = (id: string, updated: Partial<BlogPost>) => {
-    setBlogPosts(prev => prev.map(b => b.id === id ? { ...b, ...updated } : b));
+    setBlogPosts(prev => {
+      const next = prev.map(b => b.id === id ? { ...b, ...updated } : b);
+      const target = next.find(b => b.id === id);
+      if (target) saveDbPost(target).catch(console.error);
+      return next;
+    });
   };
 
   const deleteBlogPost = (id: string) => {
     setBlogPosts(prev => prev.filter(b => b.id !== id));
+    deleteDbPost(id).catch(console.error);
+  };
+
+  // Team Members CRUD with Firestore Sync
+  const addTeamMember = async (member: TeamMember) => {
+    setTeamMembers(prev => [...prev, member]);
+    await saveDbTeamMember(member);
+  };
+
+  const updateTeamMember = async (id: string, updated: Partial<TeamMember>) => {
+    setTeamMembers(prev => {
+      const next = prev.map(m => m.id === id ? { ...m, ...updated } : m);
+      const target = next.find(m => m.id === id);
+      if (target) saveDbTeamMember(target).catch(console.error);
+      return next;
+    });
+  };
+
+  const deleteTeamMember = async (id: string) => {
+    setTeamMembers(prev => prev.filter(m => m.id !== id));
+    await deleteDbTeamMember(id);
+  };
+
+  // Comments CRUD with Firestore Sync
+  const addComment = async (commentData: Omit<Comment, 'id' | 'date'> & Partial<Comment>) => {
+    const newComment: Comment = {
+      id: commentData.id || `cmt_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      author: commentData.author || 'Anonymous Reader',
+      text: commentData.text,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      avatar: commentData.avatar || `https://i.pravatar.cc/100?u=${(commentData.author || 'user').replace(/\s/g, '')}`,
+      postId: commentData.postId,
+      email: commentData.email,
+      createdAt: Date.now()
+    };
+    setComments(prev => [newComment, ...prev]);
+    await addDbComment(newComment);
+  };
+
+  const deleteComment = async (id: string) => {
+    setComments(prev => prev.filter(c => c.id !== id));
+    await deleteDbComment(id);
+  };
+
+  const getCommentsForPost = (postId: string): Comment[] => {
+    return comments.filter(c => c.postId === postId);
+  };
+
+  // Manual Trigger to re-seed or check DB sync
+  const syncWithDatabase = async () => {
+    await seedDatabaseIfEmpty();
+    const isConn = await testConnection();
+    setDbConnected(isConn);
   };
 
   // Services CRUD
@@ -1123,25 +1340,31 @@ Ready to auto-post articles and site announcements.`;
 
   // Settings
   const updateSettings = (newSettings: Partial<SiteSettings>) => {
-    setSettings(prev => ({
-      ...prev,
-      ...newSettings,
-      notificationsEmail: newSettings.notificationsEmail || prev.notificationsEmail || DEFAULT_NOTIFY_EMAIL,
-      announcement: { ...prev.announcement, ...(newSettings.announcement || {}) },
-      hero: { ...prev.hero, ...(newSettings.hero || {}) },
-      company: { ...prev.company, ...(newSettings.company || {}) },
-      socials: { ...prev.socials, ...(newSettings.socials || {}) },
-      telegram: newSettings.telegram ? { ...prev.telegram, ...newSettings.telegram } : prev.telegram
-    }));
+    setSettings(prev => {
+      const merged: SiteSettings = {
+        ...prev,
+        ...newSettings,
+        notificationsEmail: newSettings.notificationsEmail || prev.notificationsEmail || DEFAULT_NOTIFY_EMAIL,
+        announcement: { ...prev.announcement, ...(newSettings.announcement || {}) },
+        hero: { ...prev.hero, ...(newSettings.hero || {}) },
+        company: { ...prev.company, ...(newSettings.company || {}) },
+        socials: { ...prev.socials, ...(newSettings.socials || {}) },
+        telegram: newSettings.telegram ? { ...prev.telegram, ...newSettings.telegram } : prev.telegram
+      };
+      saveDbSettings(merged).catch(console.error);
+      return merged;
+    });
   };
 
   // Export & Import
   const exportAllData = (): string => {
     const bundle = {
-      version: '1.3',
+      version: '1.4',
       exportedAt: new Date().toISOString(),
       projects,
       blogPosts,
+      teamMembers,
+      comments,
       services,
       testimonials,
       userRequests,
@@ -1160,6 +1383,8 @@ Ready to auto-post articles and site announcements.`;
       if (data && typeof data === 'object') {
         if (Array.isArray(data.projects)) setProjects(data.projects);
         if (Array.isArray(data.blogPosts)) setBlogPosts(data.blogPosts);
+        if (Array.isArray(data.teamMembers)) setTeamMembers(data.teamMembers);
+        if (Array.isArray(data.comments)) setComments(data.comments);
         if (Array.isArray(data.services)) setServices(data.services);
         if (Array.isArray(data.testimonials)) setTestimonials(data.testimonials);
         if (Array.isArray(data.userRequests)) setUserRequests(data.userRequests);
@@ -1179,6 +1404,8 @@ Ready to auto-post articles and site announcements.`;
   const resetToDefaults = () => {
     setProjects(PROJECTS);
     setBlogPosts(BLOG_POSTS);
+    setTeamMembers(INITIAL_TEAM_MEMBERS);
+    setComments([]);
     setServices(SERVICES);
     setTestimonials(INITIAL_TESTIMONIALS);
     setUserRequests(INITIAL_USER_REQUESTS);
@@ -1189,6 +1416,8 @@ Ready to auto-post articles and site announcements.`;
     setSettings(INITIAL_SITE_SETTINGS);
     localStorage.removeItem(STORAGE_KEYS.PROJECTS);
     localStorage.removeItem(STORAGE_KEYS.BLOGS);
+    localStorage.removeItem(STORAGE_KEYS.TEAM_MEMBERS);
+    localStorage.removeItem(STORAGE_KEYS.COMMENTS);
     localStorage.removeItem(STORAGE_KEYS.SERVICES);
     localStorage.removeItem(STORAGE_KEYS.TESTIMONIALS);
     localStorage.removeItem(STORAGE_KEYS.REQUESTS);
@@ -1217,8 +1446,18 @@ Ready to auto-post articles and site announcements.`;
         notificationLogs,
         telegramConfig,
         telegramLogs,
+        teamMembers,
+        comments,
+        dbConnected,
         isAdmin,
         isAuthenticated: isAdmin,
+        syncWithDatabase,
+        addTeamMember,
+        updateTeamMember,
+        deleteTeamMember,
+        addComment,
+        deleteComment,
+        getCommentsForPost,
         addProject,
         updateProject,
         deleteProject,

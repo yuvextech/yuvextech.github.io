@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { marked, Tokens } from 'marked';
+import { copyToClipboard } from '../utils/clipboard';
 
 interface CodeSnippetData {
   title: string;
@@ -27,7 +28,7 @@ export const InteractiveCodeBlock: React.FC<{
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(code);
+      await copyToClipboard(code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (e) {

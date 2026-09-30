@@ -1,0 +1,141 @@
+{
+  "entities": {
+    "BlogPost": {
+      "title": "BlogPost",
+      "description": "Technical articles, engineering insights, and tech news published on Yuvex Tech",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title of the post" },
+        "excerpt": { "type": "string", "description": "Short excerpt summary" },
+        "content": { "type": "string", "description": "Full markdown content" },
+        "author": { "type": "string", "description": "Author name" },
+        "date": { "type": "string", "description": "Publication date string" },
+        "readTime": { "type": "string", "description": "Estimated read time" },
+        "category": { "type": "string", "description": "Category or topic" },
+        "image": { "type": "string", "description": "Cover banner image URL" },
+        "featured": { "type": "boolean", "description": "Whether post is featured" },
+        "views": { "type": "number", "description": "View counter" },
+        "likes": { "type": "number", "description": "Like counter" },
+        "updatedAt": { "type": "string", "description": "Last updated timestamp" }
+      },
+      "required": ["title", "content", "author", "category"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "User comments on blog posts",
+      "type": "object",
+      "properties": {
+        "postId": { "type": "string", "description": "Associated blog post ID" },
+        "author": { "type": "string", "description": "Name of commentator" },
+        "authorAvatar": { "type": "string", "description": "Avatar URL" },
+        "email": { "type": "string", "description": "Commentator email" },
+        "content": { "type": "string", "description": "Comment text" },
+        "date": { "type": "string", "description": "Date formatted string" },
+        "createdAt": { "type": "number", "description": "Unix timestamp in ms" },
+        "status": { "type": "string", "description": "Approval status" }
+      },
+      "required": ["postId", "author", "content"]
+    },
+    "CpanelSettings": {
+      "title": "CpanelSettings",
+      "description": "Control panel site configuration, branding, and contact settings",
+      "type": "object",
+      "properties": {
+        "siteName": { "type": "string", "description": "Branded site name" },
+        "siteTitle": { "type": "string", "description": "Default browser title" },
+        "siteDescription": { "type": "string", "description": "Meta description" },
+        "contactEmail": { "type": "string", "description": "Public contact email" },
+        "contactPhone": { "type": "string", "description": "Support phone number" },
+        "notificationsEmail": { "type": "string", "description": "Destination for lead inquiries" },
+        "heroHeadline": { "type": "string", "description": "Hero section headline" },
+        "heroSubheadline": { "type": "string", "description": "Hero section subheadline" },
+        "announcementText": { "type": "string", "description": "Banner announcement text" },
+        "announcementActive": { "type": "boolean", "description": "Whether banner is visible" },
+        "socialLinks": { "type": "object", "description": "Social media URL mappings" },
+        "maintenanceMode": { "type": "boolean", "description": "Whether maintenance mode is on" },
+        "updatedAt": { "type": "string", "description": "Last updated timestamp" }
+      },
+      "required": ["siteName"]
+    },
+    "TeamMember": {
+      "title": "TeamMember",
+      "description": "Team member profiles and leadership information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Full name" },
+        "role": { "type": "string", "description": "Position or engineering title" },
+        "bio": { "type": "string", "description": "Short biography" },
+        "image": { "type": "string", "description": "Headshot photo URL" },
+        "skills": { "type": "array", "description": "List of technical skills" },
+        "socialLinks": { "type": "object", "description": "Social links" },
+        "displayOrder": { "type": "number", "description": "Sorting rank" },
+        "isPublished": { "type": "boolean", "description": "Public visibility" }
+      },
+      "required": ["name", "role", "bio"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Portfolio projects and architectural case studies",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Project title" },
+        "description": { "type": "string", "description": "Summary description" },
+        "heroSubtitle": { "type": "string", "description": "Architecture case study subtitle" },
+        "category": { "type": "string", "description": "Project category" },
+        "image": { "type": "string", "description": "Hero image URL" },
+        "tags": { "type": "array", "description": "Tech tags" },
+        "link": { "type": "string", "description": "Live external demo link" },
+        "featured": { "type": "boolean", "description": "Featured flag" },
+        "overview": { "type": "string", "description": "Extended overview" },
+        "architecture": { "type": "object", "description": "System architecture details" },
+        "techStack": { "type": "array", "description": "Tech stack breakdown" },
+        "metrics": { "type": "array", "description": "Performance benchmarks" },
+        "challenges": { "type": "array", "description": "Technical challenges" },
+        "order": { "type": "number", "description": "Display order" }
+      },
+      "required": ["title", "category", "description"]
+    },
+    "UserInquiry": {
+      "title": "UserInquiry",
+      "description": "Contact form submissions and project requests",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Prospect name" },
+        "email": { "type": "string", "description": "Prospect email" },
+        "projectType": { "type": "string", "description": "Requested project type" },
+        "budget": { "type": "string", "description": "Estimated budget" },
+        "message": { "type": "string", "description": "Message content" },
+        "source": { "type": "string", "description": "Source page" },
+        "createdAt": { "type": "number", "description": "Submission timestamp" },
+        "status": { "type": "string", "description": "Status" }
+      },
+      "required": ["name", "email", "message"]
+    }
+  },
+  "firestore": {
+    "/posts/{postId}": {
+      "schema": { "$ref": "#/entities/BlogPost" },
+      "description": "Knowledge base posts and tech news articles"
+    },
+    "/comments/{commentId}": {
+      "schema": { "$ref": "#/entities/Comment" },
+      "description": "User comments on articles"
+    },
+    "/cpanel_settings/{settingId}": {
+      "schema": { "$ref": "#/entities/CpanelSettings" },
+      "description": "Control panel site settings and configuration"
+    },
+    "/team_members/{memberId}": {
+      "schema": { "$ref": "#/entities/TeamMember" },
+      "description": "Team members and leadership info"
+    },
+    "/projects/{projectId}": {
+      "schema": { "$ref": "#/entities/Project" },
+      "description": "Portfolio projects and architecture case studies"
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/UserInquiry" },
+      "description": "Client contact requests and leads"
+    }
+  }
+}

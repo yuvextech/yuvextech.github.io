@@ -77,6 +77,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <li><button onClick={() => onNavigate('blog')} className="hover:text-blue-600 dark:hover:text-white transition-colors text-left">Latest News</button></li>
               <li><button onClick={() => onNavigate('brainstorm')} className="hover:text-blue-600 dark:hover:text-white transition-colors text-left">AI Brainstorm</button></li>
               <li><button onClick={() => onNavigate('testimonials')} className="hover:text-blue-600 dark:hover:text-white transition-colors text-left">Testimonials</button></li>
+              <li><button onClick={() => onNavigate('seo-tools')} className="hover:text-blue-600 dark:hover:text-white transition-colors text-left flex items-center gap-1.5"><span className="text-blue-500 font-bold">⚡</span><span>SEO Tools & Sitemap</span></button></li>
               <li><button onClick={() => onNavigate('privacy')} className="hover:text-blue-600 dark:hover:text-white transition-colors text-left">Privacy Policy</button></li>
               <li className="pt-2 border-t border-gray-200 dark:border-white/10">
               </li>

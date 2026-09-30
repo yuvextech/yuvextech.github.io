@@ -22,9 +22,12 @@ import ProjectDetailPage from './components/ProjectDetailPage';
 import ExploreDetailsPage from './components/ExploreDetailsPage';
 import AdminCMS from './components/AdminCMS';
 import AnnouncementBar from './components/AnnouncementBar';
+import SEOToolsPage from './components/SEOToolsPage';
+import QuickActionDock from './components/QuickActionDock';
+import { updatePageSEO, buildDynamicUrl, getBaseUrl, generateArticleSchema, generateProjectSchema, generateDefaultSchema } from './utils/seo';
 import { CMSProvider, useCMS } from './context/CMSContext';
 
-type ViewState = 'home' | 'privacy' | 'portfolio' | 'contact' | 'about' | 'blog' | 'blog-detail' | 'services' | 'testimonials' | 'brainstorm' | 'project-detail' | 'explore-details' | 'admin';
+type ViewState = 'home' | 'privacy' | 'portfolio' | 'contact' | 'about' | 'blog' | 'blog-detail' | 'services' | 'testimonials' | 'brainstorm' | 'project-detail' | 'explore-details' | 'admin' | 'seo-tools';
 
 const AppContent: React.FC = () => {
   const { projects, blogPosts, settings } = useCMS();
@@ -50,157 +53,187 @@ const AppContent: React.FC = () => {
     localStorage.setItem('yuvex_theme', theme);
   }, [theme]);
 
-  // SEO & Meta Tag Management
+  // Dynamic SEO & Meta Tag Management
   useEffect(() => {
     const brandName = settings.siteName || 'Yuvex Tech';
-    let title = `${brandName} | Premium App Development & AI Solutions`;
-    let description = 'Yuvex Tech specializes in high-end mobile app development, custom web platforms, and strategic AI integration.';
+    let title = `${brandName} | App Development & AI Solutions`;
+    let description = 'Yuvex Tech specializes in high-end mobile app development, custom web platforms, and strategic AI integration with world-class UI/UX design.';
+    let canonical = buildDynamicUrl('home');
+    let ogType: 'website' | 'article' = 'website';
+    let ogImage = `${getBaseUrl()}/og-preview.png`;
+    let schema: Record<string, any> | undefined;
 
     switch (view) {
       case 'admin':
         title = `Admin Content Studio | ${brandName}`;
         description = 'Manage projects, tech news, services, testimonials, and site-wide settings.';
+        canonical = buildDynamicUrl('admin');
+        break;
+      case 'seo-tools':
+        title = `SEO Tools & Dynamic SERP Previewer | ${brandName}`;
+        description = 'Real-time on-page SEO health audits, Google & Social card SERP previewers, dynamic sitemap generation, and Schema.org structured data validation.';
+        canonical = buildDynamicUrl('seo-tools');
         break;
       case 'portfolio':
-        title = `Our Portfolio | ${brandName}`;
-        description = 'Explore our latest work in mobile apps, web platforms, and AI integrations.';
+        title = `Portfolio & Architecture Case Studies | ${brandName}`;
+        description = 'Explore enterprise applications, telemedicine solutions, and high-frequency trading platforms designed and engineered by Yuvex Tech.';
+        canonical = buildDynamicUrl('portfolio');
         break;
       case 'blog':
         title = `The Knowledge Base & Tech News | ${brandName}`;
         description = 'Insights on engineering, design, and artificial intelligence from our team.';
+        canonical = buildDynamicUrl('blog');
         break;
-      case 'blog-detail':
+      case 'blog-detail': {
         const post = blogPosts.find(p => p.id === selectedBlogId);
         if (post) {
           title = `${post.title} | ${brandName} Blog`;
           description = post.excerpt;
+          canonical = buildDynamicUrl('blog', post.id);
+          ogType = 'article';
+          ogImage = post.image;
+          schema = generateArticleSchema(post, canonical);
         }
         break;
+      }
       case 'explore-details':
-      case 'project-detail':
+      case 'project-detail': {
         const project = projects.find(p => p.id === selectedProjectId) || projects[0];
         if (project) {
-          title = `${project.title} | Explore Details & Architecture | ${brandName}`;
+          title = `${project.title} | Architecture & Engineering Case Study | ${brandName}`;
           description = project.heroSubtitle || project.overview || project.description;
+          canonical = buildDynamicUrl('project', project.id);
+          ogImage = project.image;
+          schema = generateProjectSchema(project, canonical);
         }
         break;
+      }
       case 'services':
-        title = `Our Services | ${brandName}`;
+        title = `Engineering Services & Solutions | ${brandName}`;
         description = 'High-end mobile app development, custom web platforms, and AI strategy.';
+        canonical = buildDynamicUrl('services');
         break;
       case 'about':
-        title = `About ${brandName} | Engineering Excellence`;
+        title = `About Our Engineering Philosophy | ${brandName}`;
         description = 'Learn about our mission to transform bold ideas into high-performance digital products.';
+        canonical = buildDynamicUrl('about');
         break;
       case 'contact':
         title = `Contact Us | Start Your Project | ${brandName}`;
         description = 'Ready to build something amazing? Get in touch with our expert engineering team.';
+        canonical = buildDynamicUrl('contact');
         break;
       case 'brainstorm':
-        title = `AI Brainstorming | ${brandName}`;
+        title = `AI Product Brainstorming Studio | ${brandName}`;
         description = 'Use our AI-powered tool to brainstorm your next big digital product.';
+        canonical = buildDynamicUrl('brainstorm');
         break;
       case 'privacy':
-        title = `Privacy Policy | ${brandName}`;
+        title = `Privacy Policy & Compliance | ${brandName}`;
         description = `How we handle and protect your data at ${brandName}.`;
+        canonical = buildDynamicUrl('privacy');
         break;
     }
 
-    document.title = title;
-    
-    // Update meta description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', description);
-    }
-
-    // Update OG tags
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute('content', title);
-    
-    const ogDescription = document.querySelector('meta[property="og:description"]');
-    if (ogDescription) ogDescription.setAttribute('content', description);
-
-    const twitterTitle = document.querySelector('meta[name="twitter:title"]');
-    if (twitterTitle) twitterTitle.setAttribute('content', title);
-
-    const twitterDescription = document.querySelector('meta[name="twitter:description"]');
-    if (twitterDescription) twitterDescription.setAttribute('content', description);
-
+    // Apply comprehensive SEO update across DOM head
+    updatePageSEO({
+      title,
+      description,
+      canonicalUrl: canonical,
+      ogType,
+      ogImage,
+      schema: schema || generateDefaultSchema({ title, description, canonicalUrl: canonical })
+    });
   }, [view, selectedProjectId, selectedBlogId, projects, blogPosts, settings.siteName]);
 
+  // Dynamic URL Resolution & History Listener
   useEffect(() => {
-    const handleHash = () => {
-      const hash = window.location.hash;
-      if (hash === '#admin' || hash === '#cms') {
-        setView('admin');
-      } else if (hash === '#privacy') {
-        setView('privacy');
-      } else if (hash === '#portfolio-page') {
-        setView('portfolio');
-      } else if (hash === '#contact-page') {
-        setView('contact');
-      } else if (hash === '#about') {
-        setView('about');
-      } else if (hash === '#blog-page') {
-        setView('blog');
-      } else if (hash === '#services-page') {
-        setView('services');
-      } else if (hash === '#testimonials-page') {
-        setView('testimonials');
-      } else if (hash === '#brainstorm-page') {
-        setView('brainstorm');
-      } else if (hash === '#explore-details') {
+    const resolveLocation = () => {
+      const pathname = window.location.pathname.replace(/^\/+/, '');
+      const hash = window.location.hash.replace(/^#\/?/, '');
+      const fullPath = pathname || hash;
+
+      // 1. Projects / Explore Details
+      if (fullPath.startsWith('project/') || fullPath.startsWith('explore-details/')) {
+        const id = fullPath.split('/')[1];
+        if (id) setSelectedProjectId(id);
         setView('explore-details');
-      } else if (hash.startsWith('#explore-details/')) {
-        const id = hash.replace('#explore-details/', '');
-        setSelectedProjectId(id);
+      } else if (fullPath === 'explore-details') {
         setView('explore-details');
-      } else if (hash.startsWith('#project/')) {
-        const id = hash.replace('#project/', '');
-        setSelectedProjectId(id);
-        setView('explore-details');
-      } else if (hash.startsWith('#blog/')) {
-        const id = hash.replace('#blog/', '');
-        setSelectedBlogId(id);
+      }
+      // 2. Blog Posts
+      else if (fullPath.startsWith('blog/')) {
+        const id = fullPath.split('/')[1];
+        if (id) setSelectedBlogId(id);
         setView('blog-detail');
+      }
+      // 3. Named Routes
+      else if (fullPath === 'seo-tools') {
+        setView('seo-tools');
+      } else if (fullPath === 'admin' || fullPath === 'cms') {
+        setView('admin');
+      } else if (fullPath === 'privacy') {
+        setView('privacy');
+      } else if (fullPath === 'portfolio' || fullPath === 'portfolio-page') {
+        setView('portfolio');
+      } else if (fullPath === 'contact' || fullPath === 'contact-page') {
+        setView('contact');
+      } else if (fullPath === 'about') {
+        setView('about');
+      } else if (fullPath === 'blog' || fullPath === 'blog-page') {
+        setView('blog');
+      } else if (fullPath === 'services' || fullPath === 'services-page') {
+        setView('services');
+      } else if (fullPath === 'testimonials' || fullPath === 'testimonials-page') {
+        setView('testimonials');
+      } else if (fullPath === 'brainstorm' || fullPath === 'brainstorm-page') {
+        setView('brainstorm');
       } else {
         setView('home');
       }
     };
-    window.addEventListener('hashchange', handleHash);
-    handleHash();
-    return () => window.removeEventListener('hashchange', handleHash);
+
+    window.addEventListener('popstate', resolveLocation);
+    window.addEventListener('hashchange', resolveLocation);
+    resolveLocation();
+
+    return () => {
+      window.removeEventListener('popstate', resolveLocation);
+      window.removeEventListener('hashchange', resolveLocation);
+    };
   }, []);
 
   const navigateTo = (newView: ViewState, id?: string) => {
+    let newPath = '/';
+    let newHash = '';
+
     if ((newView === 'explore-details' || newView === 'project-detail') && id) {
       setSelectedProjectId(id);
-      window.location.hash = `explore-details/${id}`;
+      newPath = `/project/${id}`;
+      newHash = `#/project/${id}`;
     } else if (newView === 'explore-details') {
-      window.location.hash = selectedProjectId ? `explore-details/${selectedProjectId}` : 'explore-details';
+      const activeId = id || selectedProjectId || (projects[0]?.id ?? '');
+      if (activeId) setSelectedProjectId(activeId);
+      newPath = `/project/${activeId}`;
+      newHash = `#/project/${activeId}`;
     } else if (newView === 'blog-detail' && id) {
       setSelectedBlogId(id);
-      window.location.hash = `blog/${id}`;
+      newPath = `/blog/${id}`;
+      newHash = `#/blog/${id}`;
     } else if (newView === 'home') {
-      window.location.hash = '';
-    } else if (newView === 'admin') {
-      window.location.hash = 'admin';
+      newPath = '/';
+      newHash = '';
     } else {
-      const hashMap: Record<string, string> = {
-        portfolio: 'portfolio-page',
-        contact: 'contact-page',
-        about: 'about',
-        blog: 'blog-page',
-        services: 'services-page',
-        testimonials: 'testimonials-page',
-        brainstorm: 'brainstorm-page',
-        'explore-details': 'explore-details',
-        privacy: 'privacy',
-        admin: 'admin'
-      };
-      window.location.hash = hashMap[newView] || '';
+      newPath = `/${newView}`;
+      newHash = `#/${newView}`;
     }
+
+    try {
+      window.history.pushState({ view: newView, id }, '', newHash || newPath);
+    } catch {
+      window.location.hash = newHash;
+    }
+
     setView(newView);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -271,13 +304,15 @@ const AppContent: React.FC = () => {
           <TestimonialsPage onBack={() => navigateTo('home')} onContact={() => navigateTo('contact')} />
         ) : view === 'brainstorm' ? (
           <BrainstormPage onBack={() => navigateTo('home')} onContact={() => navigateTo('contact')} />
+        ) : view === 'seo-tools' ? (
+          <SEOToolsPage onBack={() => navigateTo('home')} onNavigateToPage={(route, id) => navigateTo(route as ViewState, id)} />
         ) : (view === 'explore-details' || view === 'project-detail') ? (
           <ExploreDetailsPage 
             selectedId={selectedProjectId}
             onBack={() => navigateTo('portfolio')}
             onSelectProject={(id) => {
               setSelectedProjectId(id);
-              window.location.hash = `explore-details/${id}`;
+              navigateTo('explore-details', id);
             }}
             onContact={() => navigateTo('contact')}
             onBrainstorm={() => navigateTo('brainstorm')}
@@ -286,6 +321,13 @@ const AppContent: React.FC = () => {
           <PrivacyPolicy onBack={() => navigateTo('home')} />
         )}
       </main>
+
+      <QuickActionDock 
+        currentView={view} 
+        onNavigate={(v, id) => navigateTo(v as ViewState, id)} 
+        theme={theme} 
+        onToggleTheme={toggleTheme} 
+      />
 
       <Footer onNavigate={navigateTo} />
     </div>

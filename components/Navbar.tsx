@@ -35,14 +35,13 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
   }, [isMenuOpen]);
 
   const navLinks = [
-    { name: 'Services', href: '#services-page', type: 'view', target: 'services' as const },
+    { name: 'Services', href: '#services', type: 'view', target: 'services' as const },
     { name: 'About', href: '#about', type: 'view', target: 'about' as const },
-    { name: 'Portfolio', href: '#portfolio-page', type: 'view', target: 'portfolio' as const },
-    { name: 'Explore Details', href: '#explore-details', type: 'view', target: 'explore-details' as const },
-    { name: 'Blog', href: '#blog-page', type: 'view', target: 'blog' as const },
-    { name: 'Brainstorm', href: '#brainstorm-page', type: 'view', target: 'brainstorm' as const },
-    { name: 'Testimonials', href: '#testimonials-page', type: 'view', target: 'testimonials' as const },
-    { name: 'Contact', href: '#contact-page', type: 'view', target: 'contact' as const },
+    { name: 'Portfolio', href: '#portfolio', type: 'view', target: 'portfolio' as const },
+    { name: 'Blog', href: '#blog', type: 'view', target: 'blog' as const },
+    { name: 'Brainstorm', href: '#brainstorm', type: 'view', target: 'brainstorm' as const },
+    { name: 'SEO Tools', href: '#seo-tools', type: 'view', target: 'seo-tools' as const },
+    { name: 'Contact', href: '#contact', type: 'view', target: 'contact' as const },
   ];
 
   const handleLinkClick = (e: React.MouseEvent, link: typeof navLinks[0]) => {
@@ -95,6 +94,18 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
 
           <div className="flex items-center gap-2.5 sm:gap-3">
             <GlobalSearch onNavigate={onNavigate} />
+            <button 
+              onClick={() => onNavigate('seo-tools')}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-1.5 ${
+                currentView === 'seo-tools'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                  : 'border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-500/10 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white'
+              }`}
+              title="SEO Tools & SERP Previewer"
+            >
+              <span>⚡</span>
+              <span className="hidden xl:inline">SEO Tools</span>
+            </button>
             <button 
               onClick={onToggleTheme}
               className="p-2.5 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white transition-all active:scale-95"

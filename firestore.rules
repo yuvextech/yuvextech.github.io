@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isValidComment(data) {
+      return data.postId is string &&
+             data.author is string &&
+             data.author.size() > 0 &&
+             data.author.size() <= 100 &&
+             data.content is string &&
+             data.content.size() > 0 &&
+             data.content.size() <= 3000;
+    }
+
+    function isValidInquiry(data) {
+      return data.name is string &&
+             data.name.size() > 0 &&
+             data.name.size() <= 150 &&
+             data.email is string &&
+             data.email.size() > 0 &&
+             data.message is string &&
+             data.message.size() > 0 &&
+             data.message.size() <= 5000;
+    }
+
+    // Posts Collection
+    match /posts/{postId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Comments Collection
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if isValidComment(request.resource.data);
+      allow update, delete: if true;
+    }
+
+    // CPanel Settings
+    match /cpanel_settings/{settingId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Team Members
+    match /team_members/{memberId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Projects
+    match /projects/{projectId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Inquiries / Leads
+    match /inquiries/{inquiryId} {
+      allow read: if true;
+      allow create: if isValidInquiry(request.resource.data);
+      allow update, delete: if true;
+    }
+  }
+}

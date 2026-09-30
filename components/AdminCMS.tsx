@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { useCMS } from '../context/CMSContext';
 import { Project, BlogPost, Service, TestimonialItem, UserRequest } from '../types';
+import { copyToClipboard } from '../utils/clipboard';
 import AIPostGeneratorModal from './AIPostGeneratorModal';
 import SubmitReviewModal from './SubmitReviewModal';
 import TelegramCpanel from './TelegramCpanel';
+import AdminDatabaseHub from './AdminDatabaseHub';
+import AdminTeamHub from './AdminTeamHub';
+import AdminCommentsHub from './AdminCommentsHub';
 
 interface AdminCMSProps {
   onBackToSite?: () => void;
@@ -13,7 +17,7 @@ interface AdminCMSProps {
   onNavigateToBlog?: (id: string) => void;
 }
 
-type CMSTab = 'overview' | 'inquiries' | 'projects' | 'blogs' | 'telegram' | 'website' | 'services' | 'testimonials' | 'settings';
+type CMSTab = 'overview' | 'database' | 'inquiries' | 'projects' | 'blogs' | 'team' | 'comments' | 'telegram' | 'website' | 'services' | 'testimonials' | 'settings';
 
 const PRESET_IMAGES = [
   { label: 'FinTech Dashboard', url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80' },
@@ -176,6 +180,10 @@ const AdminCMS: React.FC<AdminCMSProps> = ({
   // Password Change State
   const [newPassInput, setNewPassInput] = useState('');
   const [passChangeSuccess, setPassChangeSuccess] = useState(false);
+  const [passChangeError, setPassChangeError] = useState<string | null>(null);
+  const [emailSaveFeedback, setEmailSaveFeedback] = useState<string | null>(null);
+  const [factoryResetSuccess, setFactoryResetSuccess] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   // Import JSON Modal State
   const [importJsonText, setImportJsonText] = useState('');
@@ -432,11 +440,21 @@ const AdminCMS: React.FC<AdminCMSProps> = ({
   // Handle manual broadcast of announcement to Telegram
   const handleManualBroadcastAnnouncement = async () => {
     if (!telegramConfig.botToken) {
-      alert('Please configure your Telegram Bot Token in the Telegram Auto-Post tab first.');
+      setAnnouncementTelegramFeedback({
+        show: true,
+        ok: false,
+        message: 'Please configure your Telegram Bot Token in the Telegram Auto-Post tab first.'
+      });
+      setTimeout(() => setAnnouncementTelegramFeedback(null), 5000);
       return;
     }
     if (!tempSettings.announcement?.text) {
-      alert('Announcement text cannot be empty.');
+      setAnnouncementTelegramFeedback({
+        show: true,
+        ok: false,
+        message: 'Announcement text cannot be empty.'
+      });
+      setTimeout(() => setAnnouncementTelegramFeedback(null), 5000);
       return;
     }
 
@@ -565,9 +583,9 @@ Engineering Team | Yuvex Tech
     URL.revokeObjectURL(url);
   };
 
-  const handleCopyInquiry = (req: UserRequest) => {
+  const handleCopyInquiry = async (req: UserRequest) => {
     const text = `Client: ${req.name} (${req.email})\nPhone: ${req.phone || 'N/A'}\nCategory: ${req.projectType}\nBudget: ${req.budget}\nSource: ${req.source}\nDate: ${new Date(req.createdAt).toLocaleString()}\n\nMessage:\n${req.message}`;
-    navigator.clipboard.writeText(text);
+    await copyToClipboard(text);
     setCopyFeedback(req.id);
     setTimeout(() => setCopyFeedback(null), 2000);
   };
@@ -1376,9 +1394,9 @@ Engineering Team | Yuvex Tech
 
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={async () => {
                         const activeEmails = subscribers.filter(s => s.status === 'active').map(s => s.email).join(', ');
-                        navigator.clipboard.writeText(activeEmails);
+                        await copyToClipboard(activeEmails);
                         setSubActionFeedback('Copied all active subscriber emails to clipboard (BCC ready)!');
                         setTimeout(() => setSubActionFeedback(null), 3000);
                       }}
@@ -3546,13 +3564,17 @@ Engineering Team | Yuvex Tech
                   onClick={() => {
                     const emailToSave = tempSettings.notificationsEmail || 'ywapne@gmail.com';
                     updateSettings({ notificationsEmail: emailToSave });
-                    alert(`✓ Inquiry notification email successfully saved: ${emailToSave}`);
+                    setEmailSaveFeedback(`✓ Inquiry notification email saved: ${emailToSave}`);
+                    setTimeout(() => setEmailSaveFeedback(null), 3500);
                   }}
-                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-600/20"
+                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-600/20 active:scale-95"
                 >
                   Save Email
                 </button>
               </div>
+              {emailSaveFeedback && (
+                <p className="mt-2 text-xs text-emerald-400 font-bold font-mono">{emailSaveFeedback}</p>
+              )}
               <div className="mt-3 flex items-center gap-2 text-[11px] text-gray-400">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span>Active Target: <strong className="text-blue-400 font-mono font-bold">{tempSettings.notificationsEmail || 'ywapne@gmail.com'}</strong></span>
@@ -3569,7 +3591,10 @@ Engineering Team | Yuvex Tech
                 <input
                   type="password"
                   value={newPassInput}
-                  onChange={(e) => setNewPassInput(e.target.value)}
+                  onChange={(e) => {
+                    setNewPassInput(e.target.value);
+                    if (passChangeError) setPassChangeError(null);
+                  }}
                   placeholder="Enter new passcode"
                   className="px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white text-xs flex-1 focus:outline-none focus:border-blue-500 font-mono"
                 />
@@ -3578,19 +3603,24 @@ Engineering Team | Yuvex Tech
                     if (newPassInput.trim().length >= 4) {
                       changePassword(newPassInput.trim());
                       setPassChangeSuccess(true);
+                      setPassChangeError(null);
                       setNewPassInput('');
                       setTimeout(() => setPassChangeSuccess(false), 3000);
                     } else {
-                      alert('Passcode must be at least 4 characters long.');
+                      setPassChangeError('Passcode must be at least 4 characters long.');
+                      setTimeout(() => setPassChangeError(null), 4000);
                     }
                   }}
-                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold"
+                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold active:scale-95"
                 >
                   Save Passcode
                 </button>
               </div>
               {passChangeSuccess && (
                 <p className="text-xs text-emerald-400 font-bold mt-2">✓ Admin passcode updated successfully!</p>
+              )}
+              {passChangeError && (
+                <p className="text-xs text-red-400 font-bold mt-2">{passChangeError}</p>
               )}
             </div>
 
@@ -3602,7 +3632,7 @@ Engineering Team | Yuvex Tech
               </p>
               <button
                 onClick={handleDownloadBackup}
-                className="px-5 py-3 bg-gray-800 hover:bg-gray-700 text-xs font-bold text-white rounded-xl flex items-center gap-2 border border-gray-700"
+                className="px-5 py-3 bg-gray-800 hover:bg-gray-700 text-xs font-bold text-white rounded-xl flex items-center gap-2 border border-gray-700 active:scale-95"
               >
                 <span>💾</span>
                 <span>Download Full CMS Backup (.json)</span>
@@ -3625,7 +3655,7 @@ Engineering Team | Yuvex Tech
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleImportBackup}
-                  className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white rounded-xl"
+                  className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white rounded-xl active:scale-95"
                 >
                   Import & Restore Data
                 </button>
@@ -3644,17 +3674,42 @@ Engineering Team | Yuvex Tech
               <p className="text-xs text-gray-400 mb-4 leading-relaxed">
                 Clear all custom local additions and restore Yuvex Tech to default initial showcase projects, blog posts, and settings.
               </p>
-              <button
-                onClick={() => {
-                  if (confirm('Are you sure you want to reset all CMS content to original factory defaults? This cannot be undone.')) {
-                    resetToDefaults();
-                    alert('CMS content reset to factory defaults.');
-                  }
-                }}
-                className="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-xs font-bold text-white rounded-xl"
-              >
-                Reset to Factory Defaults
-              </button>
+              {showResetConfirm ? (
+                <div className="p-4 rounded-2xl bg-red-950/40 border border-red-500/40 max-w-md">
+                  <p className="text-xs text-red-300 font-bold mb-3">
+                    Are you sure? This will revert all CMS content to original factory defaults.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        resetToDefaults();
+                        setShowResetConfirm(false);
+                        setFactoryResetSuccess(true);
+                        setTimeout(() => setFactoryResetSuccess(false), 4000);
+                      }}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-500 text-xs font-bold text-white rounded-xl active:scale-95"
+                    >
+                      Yes, Reset Defaults
+                    </button>
+                    <button
+                      onClick={() => setShowResetConfirm(false)}
+                      className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-xs font-bold text-gray-300 rounded-xl"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowResetConfirm(true)}
+                  className="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-xs font-bold text-white rounded-xl active:scale-95"
+                >
+                  Reset to Factory Defaults
+                </button>
+              )}
+              {factoryResetSuccess && (
+                <p className="text-xs text-emerald-400 font-bold mt-2">✓ CMS content reset to factory defaults.</p>
+              )}
             </div>
           </div>
         )}
