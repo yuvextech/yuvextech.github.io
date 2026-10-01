@@ -1,100 +1,79 @@
 rules_version = '2';
-
-// Yuvex Tech — Firestore security rules
-//
-// Public visitors can READ published site content and CREATE contact inquiries,
-// newsletter subscriptions, blog comments and (pending) client reviews.
-// Only signed-in admins (Google accounts on the allowlist below) can change
-// content or read private data such as inquiries and subscribers.
-//
-// Keep the allowlist in sync with ADMIN_EMAILS in services/firebase.ts.
-// Deploy: Firebase Console → Firestore Database → Rules → paste → Publish
-//     or: firebase deploy --only firestore:rules
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ---------- Helpers ----------
     function isAdmin() {
       return request.auth != null
         && request.auth.token.email_verified == true
-        && request.auth.token.email.lower() in [
-          'yuvextech@gmail.com',
-          'ywapne@gmail.com',
-          'yovses@gmail.com'
-        ];
+        && request.auth.token.email.lower() in ['yuvextech@gmail.com', 'ywapne@gmail.com', 'yovses@gmail.com'];
     }
 
-    function str(v, min, max) {
-      return v is string && v.size() >= min && v.size() <= max;
+    function textOk(v, lo, hi) {
+      return v is string && v.size() >= lo && v.size() <= hi;
     }
 
-    function optStr(data, key, max) {
-      return !(key in data) || (data[key] is string && data[key].size() <= max);
+    function optText(d, k, hi) {
+      return !(k in d) || (d[k] is string && d[k].size() <= hi);
     }
 
-    function isValidComment(data) {
-      return str(data.author, 1, 100)
-        && str(data.text, 1, 3000)
-        && optStr(data, 'postId', 200)
-        && optStr(data, 'email', 254)
-        && optStr(data, 'avatar', 2048);
+    function isValidComment(d) {
+      return textOk(d.author, 1, 100) && textOk(d.text, 1, 3000)
+        && optText(d, 'postId', 200) && optText(d, 'email', 254) && optText(d, 'avatar', 2048);
     }
 
-    function isValidInquiry(data) {
-      return str(data.name, 1, 150)
-        && str(data.email, 3, 254)
-        && str(data.message, 1, 5000)
-        && data.status == 'unread'
-        && optStr(data, 'source', 200)
-        && optStr(data, 'phone', 50);
+    function isValidInquiry(d) {
+      return textOk(d.name, 1, 150) && textOk(d.email, 3, 254) && textOk(d.message, 1, 5000)
+        && d.status == 'unread' && optText(d, 'source', 200) && optText(d, 'phone', 50);
     }
 
-    function isValidSubscriber(data) {
-      return str(data.email, 3, 254)
-        && data.status == 'active'
-        && optStr(data, 'name', 150);
+    function isValidSubscriber(d) {
+      return textOk(d.email, 3, 254) && d.status == 'active' && optText(d, 'name', 150);
     }
 
-    function isValidReviewSubmission(data) {
-      return str(data.author, 1, 150)
-        && str(data.quote, 1, 3000)
-        && data.status == 'pending'
-        && data.verified == false
-        && optStr(data, 'role', 150)
-        && optStr(data, 'company', 150)
-        && optStr(data, 'avatar', 400000);
+    function isValidReview(d) {
+      return textOk(d.author, 1, 150) && textOk(d.quote, 1, 3000)
+        && d.status == 'pending' && d.verified == false
+        && optText(d, 'role', 150) && optText(d, 'company', 150) && optText(d, 'avatar', 400000);
     }
 
-    // ---------- Public content (admin-managed) ----------
-    match /posts/{id}           { allow read: if true; allow write: if isAdmin(); }
-    match /projects/{id}        { allow read: if true; allow write: if isAdmin(); }
-    match /team_members/{id}    { allow read: if true; allow write: if isAdmin(); }
-    match /services/{id}        { allow read: if true; allow write: if isAdmin(); }
-    match /cpanel_settings/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /posts/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /projects/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /team_members/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /services/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /cpanel_settings/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /test/{id} {
+      allow read: if true;
+    }
 
-    // Connectivity probe used by the app
-    match /test/{id}            { allow read: if true; allow write: if false; }
-
-    // ---------- Visitor submissions ----------
     match /comments/{id} {
       allow read: if true;
       allow create: if isValidComment(request.resource.data) || isAdmin();
       allow update, delete: if isAdmin();
     }
-
     match /testimonials/{id} {
       allow read: if resource.data.status == 'approved' || isAdmin();
-      allow create: if isValidReviewSubmission(request.resource.data) || isAdmin();
+      allow create: if isValidReview(request.resource.data) || isAdmin();
       allow update, delete: if isAdmin();
     }
-
-    // Private: visitors may only create; admins read & manage
     match /inquiries/{id} {
       allow create: if isValidInquiry(request.resource.data) || isAdmin();
       allow read, update, delete: if isAdmin();
     }
-
     match /subscribers/{id} {
       allow create: if isValidSubscriber(request.resource.data) || isAdmin();
       allow read, update, delete: if isAdmin();
