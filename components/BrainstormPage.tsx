@@ -87,15 +87,7 @@ const BrainstormPage: React.FC<BrainstormPageProps> = ({ onBack, onContact }) =>
   return (
     <div className="pt-32 pb-24 min-h-screen bg-white dark:bg-gray-950 transition-colors duration-500">
       <div className="container mx-auto px-6">
-        <button 
-          onClick={onBack}
-          className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white mb-12 transition-all group font-bold"
-        >
-          <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Home
-        </button>
+        
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Main Interface */}

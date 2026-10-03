@@ -152,15 +152,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ onBack, onSelectPost, initialPostId
             canonicalUrl={buildDynamicUrl('blog', selectedPost.id)}
           />
 
-          <button 
-            onClick={() => setSelectedPost(null)}
-            className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white mb-10 transition-all font-bold group"
-          >
-            <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to All Posts
-          </button>
+          
 
           <article>
             <div className="mb-12">
@@ -192,12 +184,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ onBack, onSelectPost, initialPostId
           </article>
 
           <div className="border-t border-gray-100 dark:border-white/5 pt-16">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-3xl font-black text-gray-900 dark:text-white">Discussion</h3>
-              <span className="text-xs font-mono px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20">
-                ⚡ Real-Time Cloud Sync
-              </span>
-            </div>
+            
 
             <form onSubmit={handleAddComment} className="mb-12 space-y-3">
               <input 
