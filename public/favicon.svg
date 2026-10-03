@@ -1,1 +1,51 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#2563eb"/><path d="M18 14h9l5 11 5-11h9l-10 20v16h-8V34z" fill="#fff"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" fill="none">
+  <defs>
+    <linearGradient id="fav-left" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0066FF" />
+      <stop offset="50%" stop-color="#00A8FF" />
+      <stop offset="100%" stop-color="#00F0FF" />
+    </linearGradient>
+
+    <linearGradient id="fav-right" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF" />
+      <stop offset="45%" stop-color="#0077FF" />
+      <stop offset="100%" stop-color="#0044EE" />
+    </linearGradient>
+
+    <linearGradient id="fav-loop" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#002D9C" />
+      <stop offset="60%" stop-color="#005BFF" />
+      <stop offset="100%" stop-color="#00B4FF" />
+    </linearGradient>
+
+    <linearGradient id="fav-stem" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0080FF" />
+      <stop offset="65%" stop-color="#0048FF" />
+      <stop offset="100%" stop-color="#0022AA" />
+    </linearGradient>
+
+    <linearGradient id="fav-sparkle" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#70E4FF" />
+      <stop offset="50%" stop-color="#00B8FF" />
+      <stop offset="100%" stop-color="#0066FF" />
+    </linearGradient>
+  </defs>
+
+  <!-- Small Sparkle Star -->
+  <path d="M 52 7 Q 52 14 45 14 Q 52 14 52 21 Q 52 14 59 14 Q 52 14 52 7 Z" fill="url(#fav-sparkle)" />
+
+  <!-- Large Sparkle Star -->
+  <path d="M 68 14 Q 68 23 58 23 Q 68 23 68 32 Q 68 23 78 23 Q 68 23 68 14 Z" fill="url(#fav-sparkle)" />
+
+  <!-- 3D Ribbon Y: Right Arm (under layer) -->
+  <path d="M 62 22 C 60 21 56 23 51 28 L 36 50 C 34 53 32 57 34 60 C 36 63 40 62 43 58 L 63 32 C 66 27 65 23 62 22 Z" fill="url(#fav-right)" />
+
+  <!-- 3D Ribbon Y: Stem Base & Loop -->
+  <path d="M 30 43 C 32 47 35 54 35 62 C 35 70 40 76 47 76 C 53 76 57 70 57 62 C 57 54 52 46 45 41 L 30 43 Z" fill="url(#fav-stem)" />
+
+  <!-- 3D Ribbon Y: Left Main Ribbon Sweeping Down to Rounded Bottom -->
+  <path d="M 12 18 C 9 18 6 22 8 26 C 11 36 19 50 28 60 C 32 65 35 70 36 75 C 36 79 40 82 45 82 C 51 82 54 77 54 71 C 54 63 48 55 41 46 L 27 32 C 23 25 20 20 15 18 C 14 18 13 18 12 18 Z" fill="url(#fav-left)" />
+
+  <!-- 3D Ribbon Y: Inner Shadow & Highlight Fold -->
+  <path d="M 29 53 C 33 59 37 65 37 70 C 37 75 41 78 44 78 C 46 78 48 76 48 72 C 48 66 43 59 37 52 Z" fill="url(#fav-loop)" />
+</svg>

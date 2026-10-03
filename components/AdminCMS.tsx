@@ -8,6 +8,7 @@ import TelegramCpanel from './TelegramCpanel';
 import AdminDatabaseHub from './AdminDatabaseHub';
 import AdminTeamHub from './AdminTeamHub';
 import AdminCommentsHub from './AdminCommentsHub';
+import { Logo } from './Logo';
 
 interface AdminCMSProps {
   onBackToSite?: () => void;
@@ -210,10 +211,10 @@ const AdminCMS: React.FC<AdminCMSProps> = ({
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/20 rounded-full blur-3xl"></div>
           
           <div className="relative z-10 text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center text-3xl mx-auto mb-4 font-bold shadow-lg shadow-blue-500/10">
-              ⚡
+            <div className="flex justify-center mb-4">
+              <Logo theme="dark" className="h-10 sm:h-11 w-auto" />
             </div>
-            <h2 className="text-2xl font-black text-white tracking-tight">Yuvex Tech CMS</h2>
+            <h2 className="text-2xl font-black text-white tracking-tight">Admin CMS Portal</h2>
             <p className="text-xs text-gray-400 mt-1">
               Administrative Control Panel for Projects, Tech News, & Site Content
             </p>
@@ -574,18 +575,15 @@ Engineering Team | Yuvex Tech
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 mb-8 border-b border-gray-800">
           <div>
             <div className="flex items-center gap-3">
-              <span className="w-9 h-9 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center font-bold text-lg">
-                ⚡
-              </span>
+              <Logo theme="dark" className="h-8 w-auto" />
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-black text-white tracking-tight">Yuvex Tech CMS Studio</h1>
                   <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-wider">
-                    Live Sync
+                    CMS Studio • Live Sync
                   </span>
                 </div>
                 <p className="text-xs text-gray-400">
-                  Logged in as <span className="text-white font-mono font-semibold">yuvextech@gmail.com</span> • Instant site updates
+                  Logged in as <span className="text-white font-mono font-semibold">yuvextech@gmail.com</span>
                 </p>
               </div>
             </div>

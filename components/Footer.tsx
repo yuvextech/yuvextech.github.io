@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useCMS } from '../context/CMSContext';
+import { Logo } from './Logo';
 import NewsletterSection from './NewsletterSection';
 
 interface FooterProps {
@@ -20,12 +21,10 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           <div className="md:col-span-2">
             <button 
               onClick={() => onNavigate('home')}
-              className="flex items-center gap-2 mb-8"
+              className="flex items-center gap-2 mb-8 hover:opacity-90 transition-opacity"
+              aria-label="Yuvex Tech Home"
             >
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white font-genos">Y</div>
-              <span className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white font-genos">
-                {settings.siteName || 'Yuvex Tech'}
-              </span>
+              <Logo className="h-8 sm:h-9 w-auto" />
             </button>
             <p className="text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed mb-8 font-medium">
               Designing and building premium digital products for startups and global brands since 2020.

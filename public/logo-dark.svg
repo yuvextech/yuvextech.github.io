@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 76" fill="none" class="yuvex-logo yuvex-logo-dark">
+  <defs>
+    <!-- 3D Ribbon Gradients for the Y icon -->
+    <linearGradient id="y-left-grad-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0066FF" />
+      <stop offset="50%" stop-color="#00A8FF" />
+      <stop offset="100%" stop-color="#00F0FF" />
+    </linearGradient>
+
+    <linearGradient id="y-right-grad-dark" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF" />
+      <stop offset="45%" stop-color="#0077FF" />
+      <stop offset="100%" stop-color="#0044EE" />
+    </linearGradient>
+
+    <linearGradient id="y-loop-shadow-dark" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#002D9C" />
+      <stop offset="60%" stop-color="#005BFF" />
+      <stop offset="100%" stop-color="#00B4FF" />
+    </linearGradient>
+
+    <linearGradient id="y-stem-core-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0080FF" />
+      <stop offset="65%" stop-color="#0048FF" />
+      <stop offset="100%" stop-color="#0022AA" />
+    </linearGradient>
+
+    <linearGradient id="y-sparkle-grad-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#70E4FF" />
+      <stop offset="50%" stop-color="#00B8FF" />
+      <stop offset="100%" stop-color="#0066FF" />
+    </linearGradient>
+
+    <filter id="y-sparkle-glow-dark" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- ICON: 3D Ribbon Y with Stars -->
+  <g class="yuvex-icon" transform="translate(4, 0)">
+    <!-- Small Sparkle Star (top left of pair) -->
+    <path d="M 50 5 Q 50 11.5 44 11.5 Q 50 11.5 50 18 Q 50 11.5 56 11.5 Q 50 11.5 50 5 Z" fill="url(#y-sparkle-grad-dark)" />
+
+    <!-- Large Sparkle Star (top right of pair) -->
+    <path d="M 64 11 Q 64 19 55 19 Q 64 19 64 27 Q 64 19 73 19 Q 64 19 64 11 Z" fill="url(#y-sparkle-grad-dark)" filter="url(#y-sparkle-glow-dark)" />
+
+    <!-- 3D Ribbon Y: Right Arm (under layer) -->
+    <path d="M 59 18 C 57 17 54 19 50 23 L 36 44 C 34 47 32 50 34 53 C 36 56 39 55 42 51 L 60 27 C 63 23 62 19 59 18 Z" fill="url(#y-right-grad-dark)" />
+
+    <!-- 3D Ribbon Y: Stem Base & Loop -->
+    <path d="M 29 38 C 31 42 34 48 34 55 C 34 62 38 68 44 68 C 50 68 53 62 53 55 C 53 48 49 41 42 36 L 29 38 Z" fill="url(#y-stem-core-dark)" />
+
+    <!-- 3D Ribbon Y: Left Main Ribbon Sweeping Down to Rounded Bottom -->
+    <path d="M 12 15 C 9 15 7 18 8 22 C 11 31 18 44 26 53 C 30 57 33 62 34 66 C 34 70 38 72 42 72 C 47 72 50 68 50 63 C 50 56 45 49 38 41 L 26 28 C 22 22 19 17 15 15 C 14 15 13 15 12 15 Z" fill="url(#y-left-grad-dark)" />
+
+    <!-- 3D Ribbon Y: Inner Shadow & Highlight Fold -->
+    <path d="M 28 47 C 32 52 35 57 35 62 C 35 66 38 69 41 69 C 43 69 45 67 45 64 C 45 58 40 52 35 46 Z" fill="url(#y-loop-shadow-dark)" />
+  </g>
+
+  <!-- WORDMARK: uvexTech (Pure White for Dark Mode) -->
+  <g class="yuvex-wordmark" fill="#FFFFFF">
+    <text x="76" y="58" font-family="'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="47" font-weight="900" letter-spacing="-0.035em">
+      <tspan font-weight="900">uvex</tspan><tspan font-weight="900" fill="#FFFFFF">Tech</tspan>
+    </text>
+  </g>
+</svg>

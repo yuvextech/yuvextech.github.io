@@ -87,11 +87,14 @@ export function subscribeAuth(callback: (user: User | null) => void) {
 
 // Firestore rejects `undefined` field values, so strip them before every write.
 function clean<T>(data: T): T {
-  return JSON.parse(JSON.stringify(data));
+  if (data === undefined) return null as unknown as T;
+  const str = JSON.stringify(data);
+  return str ? JSON.parse(str) : ({} as T);
 }
 
 function setClean(ref: DocumentReference, data: any, options?: SetOptions) {
-  return options ? setDoc(ref, clean(data), options) : setDoc(ref, clean(data));
+  const cleaned = clean(data);
+  return options ? setDoc(ref, cleaned, options) : setDoc(ref, cleaned);
 }
 
 // Initial Team Members Seed Data
@@ -264,11 +267,18 @@ export async function getDbComments(postId?: string): Promise<Comment[]> {
 export async function addDbComment(comment: Comment): Promise<void> {
   const commentId = comment.id || `cmt_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
   const docRef = doc(db, 'comments', commentId);
-  await setClean(docRef, {
-    ...comment,
+  const commentData: Record<string, any> = {
     id: commentId,
+    author: comment.author || 'Anonymous Innovator',
+    text: comment.text || '',
+    date: comment.date || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    avatar: comment.avatar || `https://i.pravatar.cc/100?u=${encodeURIComponent(comment.author || 'anon')}`,
     createdAt: comment.createdAt || Date.now()
-  });
+  };
+  if (comment.postId) commentData.postId = comment.postId;
+  if (comment.email) commentData.email = comment.email;
+
+  await setClean(docRef, commentData);
 }
 
 export async function deleteDbComment(id: string): Promise<void> {

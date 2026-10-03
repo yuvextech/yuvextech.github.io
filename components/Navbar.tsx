@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCMS } from '../context/CMSContext';
 import GlobalSearch from './GlobalSearch';
+import { Logo } from './Logo';
 
 interface NavbarProps {
   onNavigate: (
@@ -63,18 +64,17 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
 
   return (
     <>
-      <nav style={{ top: 'var(--announce-h, 0px)' }} className={`fixed left-0 w-full z-[100] transition-all duration-300 ${scrolled || isMenuOpen ? 'py-4 bg-white/90 dark:bg-gray-950/80 backdrop-blur-lg border-b border-gray-200 dark:border-white/5' : 'py-6 bg-transparent'}`}>
-        <div className="container mx-auto px-6 flex justify-between items-center">
+      <nav 
+        style={{ top: 'var(--announce-h, 0px)', height: '79.4792px' }} 
+        className={`fixed left-0 w-full z-[100] transition-all duration-300 flex items-center ${scrolled || isMenuOpen ? 'bg-white/90 dark:bg-gray-950/80 backdrop-blur-lg border-b border-gray-200 dark:border-white/5' : 'bg-transparent'}`}
+      >
+        <div className="container mx-auto px-6 flex justify-between items-center h-full">
           <button 
             onClick={() => { onNavigate('home'); setIsMenuOpen(false); window.scrollTo({top: 0, behavior: 'smooth'}); }}
-            className="flex items-center gap-2 group relative z-[110] shrink-0"
+            className="flex items-center gap-2 group relative z-[110] shrink-0 hover:opacity-90 transition-opacity"
+            aria-label="Yuvex Tech Home"
           >
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-bold text-xl text-white transition-transform group-hover:scale-110 shadow-lg shadow-blue-600/20 font-genos">
-              {(settings.siteName || 'Yuvex Tech').charAt(0)}
-            </div>
-            <span className="text-2xl font-bold tracking-tight dark:text-white font-genos whitespace-nowrap">
-              {settings.siteName || 'Yuvex Tech'}
-            </span>
+            <Logo className="h-8 sm:h-9 w-auto" />
           </button>
           
           <div className="hidden xl:flex items-center gap-5 2xl:gap-6 text-[13px] font-semibold text-gray-500 dark:text-gray-400">

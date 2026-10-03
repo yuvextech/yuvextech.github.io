@@ -13,6 +13,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@google/genai": "^1.39.0",
     "firebase": "^12.19.0",
     "marked": "^18.0.14",
     "react": "^19.2.4",

@@ -280,7 +280,7 @@ const AppContent: React.FC = () => {
         <Suspense fallback={<PageLoader />}>
         {view === 'home' ? (
           <>
-            <Hero />
+            <Hero onExploreProject={(id) => navigateTo('explore-details', id)} />
             <Services />
             <Portfolio 
               onViewAll={() => navigateTo('portfolio')} 
