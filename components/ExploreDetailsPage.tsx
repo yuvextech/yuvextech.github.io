@@ -138,75 +138,9 @@ const ExploreDetailsPage: React.FC<ExploreDetailsPageProps> = ({
           </div>
         </div>
 
-        {/* Project Switcher Bar */}
-        <section className="mb-12 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-3xl p-4 md:p-6 shadow-sm">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-            <div>
-              <span className="text-[11px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
-                Explore Case Studies
-              </span>
-              <h3 className="text-sm font-bold text-gray-600 dark:text-gray-400">
-                Select a high-performance system to inspect architecture, metrics, and technical benchmarks
-              </h3>
-            </div>
-            
-            {/* Category filter pills */}
-            <div className="flex flex-wrap gap-1.5">
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategoryFilter(cat)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                    activeCategoryFilter === cat
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white border border-gray-200 dark:border-white/5'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {filteredProjects.map((p) => {
-              const isSelected = p.id === currentProject.id;
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => onSelectProject(p.id)}
-                  className={`flex items-center gap-3 p-3 rounded-2xl text-left transition-all ${
-                    isSelected
-                      ? 'bg-white dark:bg-blue-600/10 border-2 border-blue-600 dark:border-blue-500 shadow-md ring-2 ring-blue-500/20'
-                      : 'bg-white/80 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 hover:border-blue-400/50 hover:bg-white dark:hover:bg-white/5'
-                  }`}
-                >
-                  <img
-                    src={p.image}
-                    alt={p.title}
-                    className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 truncate">
-                        {p.category}
-                      </span>
-                      {isSelected && (
-                        <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></span>
-                      )}
-                    </div>
-                    <div className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                      {p.title}
-                    </div>
-                    <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
-                      {p.client || 'Enterprise Client'}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-gray-900 dark:text-white tracking-tight leading-[1.08] mb-6">
+            {currentProject.title}
+          </h1>
 
         {/* Hero Section */}
         <section className="mb-14">
@@ -230,9 +164,7 @@ const ExploreDetailsPage: React.FC<ExploreDetailsPageProps> = ({
             )}
           </div>
 
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-gray-900 dark:text-white tracking-tight leading-[1.08] mb-6">
-            {currentProject.title}
-          </h1>
+          
 
           <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 font-medium max-w-4xl leading-relaxed mb-8">
             {currentProject.heroSubtitle || currentProject.description}

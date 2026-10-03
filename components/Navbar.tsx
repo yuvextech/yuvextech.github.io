@@ -40,7 +40,6 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
     { name: 'Portfolio', href: '#portfolio', type: 'view', target: 'portfolio' as const },
     { name: 'Blog', href: '#blog', type: 'view', target: 'blog' as const },
     { name: 'Brainstorm', href: '#brainstorm', type: 'view', target: 'brainstorm' as const },
-    { name: 'SEO Tools', href: '#seo-tools', type: 'view', target: 'seo-tools' as const },
     { name: 'Contact', href: '#contact', type: 'view', target: 'contact' as const },
   ];
 
@@ -94,18 +93,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
 
           <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
             <GlobalSearch onNavigate={onNavigate} />
-            <button 
-              onClick={() => onNavigate('seo-tools')}
-              className={`hidden sm:flex px-3 py-1.5 rounded-full text-xs font-bold border transition-all items-center gap-1.5 whitespace-nowrap ${
-                currentView === 'seo-tools'
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                  : 'border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-500/10 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white'
-              }`}
-              title="SEO Tools & SERP Previewer"
-            >
-              <span>⚡</span>
-              <span className="hidden 2xl:inline">SEO Tools</span>
-            </button>
+            
             <button 
               onClick={onToggleTheme}
               className="p-2.5 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white transition-all active:scale-95"
@@ -175,7 +163,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
           </div>
           
           <div className="absolute bottom-12 left-10 md:left-20 text-gray-400 dark:text-gray-600 text-[10px] font-bold tracking-[0.4em] uppercase">
-            Yuvex Tech Architecture © 2024
+            Yuvex Tech Architecture © 2026
           </div>
         </div>
       </div>

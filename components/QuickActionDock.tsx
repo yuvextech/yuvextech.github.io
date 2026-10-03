@@ -70,7 +70,6 @@ export const QuickActionDock: React.FC<QuickActionDockProps> = ({
               { id: 'portfolio', label: 'Portfolio', icon: '💼' },
               { id: 'services', label: 'Services', icon: '⚙️' },
               { id: 'blog', label: 'Knowledge', icon: '📚' },
-              { id: 'seo-tools', label: 'SEO Suite', icon: '⚡' },
               { id: 'contact', label: 'Contact', icon: '✉️' }
             ].map((item) => (
               <button
@@ -112,22 +111,7 @@ export const QuickActionDock: React.FC<QuickActionDockProps> = ({
 
       {/* Main Floating Buttons Bar */}
       <div className="flex items-center gap-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-gray-200 dark:border-white/10 p-1.5 rounded-full shadow-2xl">
-        {/* SEO Tools Launcher Pill */}
-        <button
-          onClick={() => onNavigate('seo-tools')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono font-bold transition-all ${
-            currentView === 'seo-tools'
-              ? 'bg-blue-600 text-white shadow-md'
-              : 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 border border-blue-200 dark:border-blue-500/20'
-          }`}
-          title="Open Live SEO Tools & SERP Previewer"
-        >
-          <span className="text-[11px]">⚡</span>
-          <span className="hidden sm:inline">SEO</span>
-          <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px]">
-            {seoScore}%
-          </span>
-        </button>
+        
 
         {/* Copy Dynamic URL Quick Button */}
         <button
