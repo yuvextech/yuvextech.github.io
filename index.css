@@ -54,6 +54,3 @@
 .pause-drift:hover { 
   animation-play-state: paused !important; 
 }
-
-/* Reserve space for the fixed announcement bar (height published by AnnouncementBar) */
-#root { padding-top: var(--announce-h, 0px); }

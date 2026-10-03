@@ -65,7 +65,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
   return (
     <>
       <nav 
-        style={{ top: 'var(--announce-h, 0px)', height: '79.4792px' }} 
+        style={{ top: 0, height: '79.4792px' }} 
         className={`fixed left-0 w-full z-[100] transition-all duration-300 flex items-center ${scrolled || isMenuOpen ? 'bg-white/90 dark:bg-gray-950/80 backdrop-blur-lg border-b border-gray-200 dark:border-white/5' : 'bg-transparent'}`}
       >
         <div className="container mx-auto px-6 flex justify-between items-center h-full">
@@ -121,30 +121,47 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
 
       {/* Mobile Menu Overlay */}
       <div className={`fixed inset-0 z-[90] xl:hidden transition-all duration-500 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-        <div className="absolute inset-0 bg-white dark:bg-gray-950/98 backdrop-blur-2xl" onClick={() => setIsMenuOpen(false)}></div>
+        <div className="absolute inset-0 bg-white/95 dark:bg-[#121010]/98 backdrop-blur-2xl transition-colors duration-300" onClick={() => setIsMenuOpen(false)}></div>
         
-        <div className={`relative h-full flex flex-col justify-center items-start px-10 md:px-20 transition-transform duration-500 ease-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-10'}`}>
-          <div className="flex flex-col items-start gap-4 w-full max-w-md">
+        <div 
+          className={`relative h-full flex flex-col justify-center items-start px-8 sm:px-12 md:px-20 bg-white/90 dark:bg-[#121010] text-gray-900 dark:text-white transition-all duration-300 ease-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-10'}`}
+        >
+          <div className="flex flex-col items-start gap-3 sm:gap-4 w-full max-w-md">
             <div className="w-full mb-1">
               <GlobalSearch onNavigate={(view, id) => { setIsMenuOpen(false); onNavigate(view, id); }} />
             </div>
-            <div className="text-blue-500 dark:text-blue-400 text-xs font-bold uppercase tracking-[0.3em] mb-2 opacity-70">Navigation</div>
+            
+            <div className="flex items-center justify-between w-full mb-1">
+              <span className="text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-[0.3em] opacity-90 dark:opacity-80">
+                Navigation
+              </span>
+              <button
+                type="button"
+                onClick={onToggleTheme}
+                className="px-3 py-1.5 rounded-full text-xs font-bold bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-200 flex items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                aria-label="Toggle theme mode"
+              >
+                <span>{theme === 'light' ? '🌙' : '☀️'}</span>
+                <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+              </button>
+            </div>
+
             {navLinks.map((link, index) => (
               <a 
                 key={link.name} 
                 href={link.href} 
                 onClick={(e) => handleLinkClick(e, link)}
-                className={`group flex items-baseline gap-4 text-4xl md:text-6xl font-black transition-all duration-300 animate-in fade-in slide-in-from-left-8 ${currentView === link.target ? 'text-blue-600' : 'text-gray-900 dark:text-white hover:text-blue-500'}`}
-                style={{ animationDelay: `${index * 60}ms` }}
+                className={`group flex items-baseline gap-4 text-3xl sm:text-4xl md:text-5xl font-black transition-all duration-300 animate-in fade-in slide-in-from-left-8 ${currentView === link.target ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400'}`}
+                style={{ animationDelay: `${index * 50}ms` }}
               >
-                <span className="text-xs font-bold text-gray-400 dark:text-gray-500 group-hover:text-blue-600 transition-colors tracking-widest mt-1">
+                <span className="text-xs font-bold text-gray-400 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors tracking-widest mt-1">
                   0{index + 1}
                 </span>
                 <span className="uppercase">{link.name}</span>
               </a>
             ))}
             
-            <div className="mt-12 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full animate-in fade-in slide-in-from-left-8" style={{ animationDelay: `${navLinks.length * 60}ms` }}>
+            <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full animate-in fade-in slide-in-from-left-8" style={{ animationDelay: `${navLinks.length * 50}ms` }}>
               <button 
                 type="button"
                 aria-label="Start a Discussion / Contact Us"
@@ -153,7 +170,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
                   onNavigate('contact');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="cursor-pointer px-10 py-5 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-500 transition-all text-center shadow-2xl shadow-blue-600/30 dark:shadow-blue-600/20 active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-500/40 flex items-center justify-center gap-2 text-base"
+                className="cursor-pointer w-full py-4 px-8 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all text-center shadow-2xl shadow-blue-600/30 dark:shadow-blue-600/20 active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-500/40 flex items-center justify-center gap-2 text-base"
               >
                 <span>💬</span>
                 <span>Start a Discussion</span>
@@ -162,7 +179,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
             </div>
           </div>
           
-          <div className="absolute bottom-12 left-10 md:left-20 text-gray-400 dark:text-gray-600 text-[10px] font-bold tracking-[0.4em] uppercase">
+          <div className="absolute bottom-8 left-8 sm:left-12 md:left-20 text-gray-500 dark:text-gray-400 text-[10px] font-bold tracking-[0.4em] uppercase">
             Yuvex Tech Architecture © 2026
           </div>
         </div>
