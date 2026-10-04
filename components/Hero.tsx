@@ -75,7 +75,7 @@ const Hero: React.FC<HeroProps> = ({ onExploreProject }) => {
   return (
     <section 
       ref={sectionRef} 
-      style={{ paddingTop: '30px', paddingBottom: '30px' }}
+      style={{ paddingTop: '49px', paddingBottom: '30px', paddingLeft: '0px' }}
       className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-white dark:bg-gray-950 transition-colors"
     >
       {/* Background Decor with animations */}
@@ -96,10 +96,6 @@ const Hero: React.FC<HeroProps> = ({ onExploreProject }) => {
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-block px-4 py-1.5 rounded-full bg-blue-50 dark:bg-white/5 border border-blue-100 dark:border-white/10 text-blue-600 dark:text-blue-400 text-sm font-medium mb-6 animate-fade-in-up">
-            {settings.heroBadge || "Building the next generation of digital products"}
-          </div>
-          
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold leading-tight mb-8 text-gray-900 dark:text-white min-h-[1.2em]">
             {displayText.split(' ').map((word, i, arr) => {
               const isLastTwo = i >= arr.length - 2;

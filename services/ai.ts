@@ -132,9 +132,12 @@ export async function generateText(prompt: string, opts: GenerateOptions = {}): 
     }
   }
 
-  // 2. Try client-side @google/genai SDK if API key is present in environment/bundle
+  // 2. Try client-side @google/genai SDK if API key is present in environment or private local admin storage
   try {
-    const apiKey = (typeof process !== 'undefined' && (process.env?.GEMINI_API_KEY || process.env?.API_KEY)) || '';
+    const localUserKey = typeof window !== 'undefined' ? localStorage.getItem('yuvex_gemini_api_key') : null;
+    const envKey = typeof process !== 'undefined' ? (process.env?.GEMINI_API_KEY || process.env?.API_KEY) : '';
+    const apiKey = (localUserKey || envKey || '').trim();
+
     if (apiKey) {
       const { GoogleGenAI } = await import('@google/genai');
       const ai = new GoogleGenAI({ apiKey });

@@ -183,6 +183,11 @@ const AdminCMS: React.FC<AdminCMSProps> = ({
   const [factoryResetSuccess, setFactoryResetSuccess] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
+  // Private API Key State (Browser-only, never committed to Git)
+  const [geminiApiKey, setGeminiApiKey] = useState(() => (typeof window !== 'undefined' ? localStorage.getItem('yuvex_gemini_api_key') || '' : ''));
+  const [apiKeyFeedback, setApiKeyFeedback] = useState<string | null>(null);
+  const [showApiKey, setShowApiKey] = useState(false);
+
   // Import JSON Modal State
   const [importJsonText, setImportJsonText] = useState('');
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -3576,6 +3581,64 @@ Engineering Team | Yuvex Tech
               <div className="mt-3 flex items-center gap-2 text-[11px] text-gray-400">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span>Active Target: <strong className="text-blue-400 font-mono font-bold">{tempSettings.notificationsEmail || 'ywapne@gmail.com'}</strong></span>
+              </div>
+            </div>
+
+            {/* Private API Key & AI Engine Configuration */}
+            <div className="p-8 rounded-3xl bg-gray-900 border border-gray-800">
+              <div className="flex items-center gap-2.5 mb-1">
+                <span className="text-xl">🔐</span>
+                <h3 className="text-lg font-bold text-white">Private Google Gemini API Key</h3>
+                <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-mono font-bold">
+                  Zero-Leak Storage
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 mb-4 leading-relaxed">
+                Save your Gemini API key strictly in your local browser session (<code className="font-mono text-blue-300">localStorage</code>). 
+                <strong> This key is never stored in Git, committed to GitHub, or visible to website visitors.</strong>
+                On serverless hosts (Vercel, Netlify, Cloud Run), you can also set <code className="font-mono text-blue-300">GEMINI_API_KEY</code> as a hidden environment variable in their dashboard.
+              </p>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-lg mb-2">
+                <div className="relative flex-1">
+                  <input
+                    type={showApiKey ? 'text' : 'password'}
+                    value={geminiApiKey}
+                    onChange={(e) => setGeminiApiKey(e.target.value)}
+                    placeholder="AIzaSy... (Saved only in this browser)"
+                    className="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl text-white text-xs focus:outline-none focus:border-blue-500 font-mono pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-xs"
+                    title={showApiKey ? "Hide key" : "Show key"}
+                  >
+                    {showApiKey ? '🙈' : '👁️'}
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (geminiApiKey.trim()) {
+                      localStorage.setItem('yuvex_gemini_api_key', geminiApiKey.trim());
+                      setApiKeyFeedback('✓ Private API key saved securely in browser storage.');
+                    } else {
+                      localStorage.removeItem('yuvex_gemini_api_key');
+                      setApiKeyFeedback('✓ Custom key cleared. System will use automated fallbacks.');
+                    }
+                    setTimeout(() => setApiKeyFeedback(null), 3500);
+                  }}
+                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-600/20 active:scale-95 shrink-0"
+                >
+                  Save Secret Key
+                </button>
+              </div>
+              {apiKeyFeedback && (
+                <p className="text-xs text-emerald-400 font-bold font-mono mt-1">{apiKeyFeedback}</p>
+              )}
+              <div className="mt-3 flex items-center gap-2 text-[11px] text-gray-400">
+                <span className={`w-2 h-2 rounded-full ${geminiApiKey ? 'bg-emerald-400' : 'bg-gray-600'} animate-pulse`}></span>
+                <span>Status: {geminiApiKey ? <span className="text-emerald-400 font-bold">Custom Key Configured</span> : <span className="text-gray-400">Zero-Crash Architectural Fallbacks Active</span>}</span>
               </div>
             </div>
 

@@ -1,6 +1,25 @@
 import path from 'path';
+import fs from 'fs';
 import { defineConfig, Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+
+function githubPagesSpaPlugin(): Plugin {
+  return {
+    name: 'github-pages-spa-fallback',
+    closeBundle() {
+      try {
+        const distDir = path.resolve(__dirname, 'dist');
+        const indexPath = path.join(distDir, 'index.html');
+        const notFoundPath = path.join(distDir, '404.html');
+        if (fs.existsSync(indexPath)) {
+          fs.copyFileSync(indexPath, notFoundPath);
+        }
+      } catch {
+        // Ignore fallback copy error if dist doesn't exist
+      }
+    }
+  };
+}
 
 function aiDevPlugin(): Plugin {
   return {
@@ -66,16 +85,12 @@ function aiDevPlugin(): Plugin {
 }
 
 export default defineConfig({
-  base: '/',
+  base: './',
   server: {
     port: 3000,
     host: '0.0.0.0',
   },
-  plugins: [react(), aiDevPlugin()],
-  define: {
-    'process.env.API_KEY': JSON.stringify(process.env.GEMINI_API_KEY || ''),
-    'process.env.GEMINI_API_KEY': JSON.stringify(process.env.GEMINI_API_KEY || '')
-  },
+  plugins: [react(), aiDevPlugin(), githubPagesSpaPlugin()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '.'),
