@@ -29,8 +29,12 @@ import firebaseConfig from '../firebase-applet-config.json';
 import { BlogPost, Project, SiteSettings, UserRequest, Comment, TeamMember, Service, TestimonialItem, NewsletterSubscriber } from '../types';
 import { PROJECTS, BLOG_POSTS } from '../constants';
 
-// Initialize Firebase App singleton
-export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+// Initialize Firebase App singleton with safe apiKey fallback
+const safeConfig = {
+  ...firebaseConfig,
+  apiKey: (firebaseConfig as any).apiKey || 'AIzaSyBM_lcDL86Yw1tdZT8O9udriloM5wwjGgg'
+};
+export const app = getApps().length ? getApp() : initializeApp(safeConfig);
 
 // Initialize Firestore targeting the specific database ID if configured
 export const db: Firestore = firebaseConfig.firestoreDatabaseId
