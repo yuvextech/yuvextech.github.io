@@ -75,7 +75,7 @@ const Hero: React.FC<HeroProps> = ({ onExploreProject }) => {
   return (
     <section 
       ref={sectionRef} 
-      style={{ paddingTop: '49px', paddingBottom: '30px', paddingLeft: '0px' }}
+      style={{ paddingTop: '70px', paddingBottom: '30px', paddingLeft: '0px' }}
       className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-white dark:bg-gray-950 transition-colors"
     >
       {/* Background Decor with animations */}

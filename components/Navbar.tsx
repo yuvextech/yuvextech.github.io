@@ -135,15 +135,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView, theme, onToggl
               <span className="text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-[0.3em] opacity-90 dark:opacity-80">
                 Navigation
               </span>
-              <button
-                type="button"
-                onClick={onToggleTheme}
-                className="px-3 py-1.5 rounded-full text-xs font-bold bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-200 flex items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                aria-label="Toggle theme mode"
-              >
-                <span>{theme === 'light' ? '🌙' : '☀️'}</span>
-                <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
-              </button>
+              
             </div>
 
             {navLinks.map((link, index) => (

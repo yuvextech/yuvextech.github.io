@@ -1,12 +1,3 @@
 #v2
-5
-/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/README.md	205	2	text
-/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/components/ContactPage.tsx	2402	55	text
-/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/components/ServicesPage.tsx	1524	41	text
-/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/components/AboutPage.tsx	2658	82	text
-/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/components/PortfolioPage.tsx	1260	33	text
-/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/components/BlogPage.tsx	7350	184	text
-/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/components/Blog.tsx	0	0	text
-/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/components/BrainstormPage.tsx	2916	87	text
-/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/components/Contact.tsx	8200	143	text
-/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/components/ClientLogos.tsx	0	0	text
+0
+/storage/emulated/0/Android/data/com.tyron.code/files/codeassist/projects/yuvextech.github.io/README.md	0	0	text

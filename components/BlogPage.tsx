@@ -205,7 +205,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ onBack, onSelectPost, initialPostId
                 disabled={!newComment.trim()}
                 className="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold rounded-2xl shadow-xl shadow-blue-600/20 active:scale-95 transition-all text-sm"
               >
-                Post Comment to Cloud Database
+                Post your Comment
               </button>
             </form>
 
